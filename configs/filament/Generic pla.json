@@ -5,6 +5,9 @@
     "filament_extruder_variant": [
         "Direct Drive Standard"
     ],
+    "filament_max_volumetric_speed": [
+        "200"
+    ],
     "filament_retraction_length": [
         "0.5"
     ],
@@ -27,10 +30,13 @@
     "inherits": "Generic PLA @System",
     "name": "Generic pla",
     "nozzle_temperature": [
-        "230"
+        "210"
     ],
     "nozzle_temperature_initial_layer": [
-        "230"
+        "212"
+    ],
+    "slow_down_layer_time": [
+        "0"
     ],
     "version": "2.3.2.60"
 }
