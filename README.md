@@ -10,7 +10,6 @@ configs/
   filament/   # per-material profiles (temps, flow, retraction)
   process/    # per-print profiles (layer height, infill, supports, speed)
 models/       # STL / 3MF inputs (commit small ones; consider git-lfs for large)
-output/       # gcode dumps from the GUI — gitignored
 docs/         # reference notes (e.g., Cura-extracted settings)
 sync-from-orca.sh  # copy GUI-saved profiles into configs/ for git review
 ```
