@@ -1,6 +1,8 @@
 {
+    "alternate_extra_wall": "1",
     "brim_type": "no_brim",
     "default_acceleration": "500",
+    "ensure_vertical_shell_thickness": "ensure_moderate",
     "filename_format": "{input_filename_base}_{filament_type[initial_tool]}_{printer_model}_{scale[0]}.gcode",
     "from": "User",
     "inherits": "0.20mm Standard @MyKlipper",
@@ -33,5 +35,5 @@
     "travel_acceleration": "700",
     "travel_speed": "175",
     "version": "2.3.2.60",
-    "wall_loops": "4"
+    "wall_loops": "2"
 }
