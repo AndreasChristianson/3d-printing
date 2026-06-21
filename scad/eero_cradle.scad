@@ -24,18 +24,23 @@ $fn = 96;
 
 /* ---------- eero footprint + wedge (keep in sync with eero_pro6.scad) ---------- */
 base_x = 139.1;   base_y = 138.9;   base_r = 34;
-tilt   = atan2(49.2 - 33.3, 132);   // wedge tilt: back lower, ~6.9 deg
+top_y  = 132;                        // top front-to-back (tilt span)
+h_front = 33.3;   h_back = 49.2;     // measured top heights (base->top), front/back middle
+tilt   = atan2(h_back - h_front, top_y);   // wedge tilt: back lower, ~6.9 deg
 k      = tan(tilt);
 
 /* ---------- fit & structure ---------- */
-clr     = 1.6;    // loose clearance around the base, per side
+clr     = 1.6;    // loose horizontal clearance around the base, per side
 wall_t  = 4.0;
 plate_t = 4.0;
 lip_w   = 7.0;    // lip reach inward (dome opening; eero seats on these)
 lip_t   = 3.0;
-base_z  = 44;     // eero base height above z=0 (tune so it seats on the lips)
-roomgap = 3.0;    // base-to-plate gap
-lip0    = 8;      // lip-plane height at y=0 (tune for dome poke-through)
+// --- vertical sizing DERIVED from the measured heights (so the eero fits) ---
+roomgap     = 3.0;  // vertical clearance: eero base to plate
+seat_clr    = 1.0;  // lip plane sits this far below the eero's top edge
+back_margin = 2.0;  // keep the lowest (back) lip above z=0
+base_z = h_back + seat_clr + back_margin;              // eero base height above z=0
+lip0   = base_z - ((h_front + h_back)/2 + seat_clr);   // lip plane height at y=0
 
 /* ---------- back beam ---------- */
 catch  = 6.0;     // beam height above the lip plane
@@ -91,22 +96,25 @@ module walls() {
 
 module lips() {
     difference() {
+        // span op..OUT and extrude up past lip0 so the lip merges solidly with
+        // the walls (avoids a coincident-face split into a separate volume)
         multmatrix(shear)
-            translate([0, 0, lip0 - lip_t]) linear_extrude(lip_t)
-                difference() { rfront(in_x, in_y, in_r); rfront(op_x, op_y, op_r); }
+            translate([0, 0, lip0 - lip_t]) linear_extrude(lip_t + 1.5)
+                difference() { rfront(out_x, out_y, out_r); rfront(op_x, op_y, op_r); }
         open_back();
     }
 }
 
 module plate() {
-    translate([0, 0, Ht])
+    pt = plate_t + 1;            // overlap 1 mm into the walls (avoid coincident face)
+    translate([0, 0, Ht - 1])
         difference() {
-            linear_extrude(plate_t) rfront(out_x, out_y, out_r);
+            linear_extrude(pt) rfront(out_x, out_y, out_r);
             px = out_x/2 - screw_inset;  py = out_y/2 - screw_inset;
             for (sx = [-1,1], sy = [-1,1])
                 translate([sx*px, sy*py, -0.1]) {
-                    cylinder(d = screw_d, h = plate_t + 0.2);
-                    translate([0,0,plate_t-2.4]) cylinder(d1 = screw_d, d2 = screw_head_d, h = 2.5);
+                    cylinder(d = screw_d, h = pt + 0.2);
+                    translate([0,0,pt-2.4]) cylinder(d1 = screw_d, d2 = screw_head_d, h = 2.5);
                 }
         }
 }
