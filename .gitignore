@@ -7,3 +7,8 @@
 
 .idea/
 .vscode/
+
+# Generated renders from scad/ sources (the .scad files are the source of truth).
+# Scoped to scad/ so the git-LFS model library under models/ stays tracked.
+scad/*.stl
+scad/*.png
