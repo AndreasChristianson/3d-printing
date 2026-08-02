@@ -56,6 +56,40 @@ Beyond A and B, options worth pricing so the family has a real menu:
 - **Route D — Pragmatic MM + fun build (split the goals).** Buy a cheap reliable multi-material commercial printer (Bambu P1S+AMS class) to own the MM workhorse role *now*, and build the Voron purely for pleasure with no daily-driver pressure. De-risks a long build; gives the family a visibly practical option (makes the fun-Voron easier to approve as the premium). Downside: another box; not a build.
 - **Route E — Modularize for approval (financing tactic, not hardware).** Present the spend as independently-approvable chunks tied to waypoints ("rails for the Kobra now, $X, better prints" → yes → "Voron frame+motion, $Y" → …). Small yeses beat one big ask. Pairs with any route.
 
+- **Route F — Kobra prints the Voron, then Kobra goes to son (no Kobra upgrades).** ⭐ strong contender.
+  - Use the **Kobra as-is** to print Voron parts in **PETG** (open-frame friendly — no enclosure needed).
+  - Build a **250 or 300** Voron; slowly buy parts.
+  - Once running, the **Voron reprints its own parts in ABS/ASA** (it's enclosed) — or skip that via **Print-It-Forward** (community prints you ABS parts for cost). Or just leave PETG parts if we only run cool-chamber materials. ⚠️ PETG parts can creep in a hot ABS chamber — fine for PLA/PETG use, reprint in ABS if we push chamber temps.
+  - **End state:** Voron (mine, multi-material) + **Kobra handed to son** (mostly stock, large but slow, "works fine for him"); **Ender retired/rehomed**.
+  - vs Route A: same fresh Voron build, but instead of spending to upgrade + keep the Kobra for myself, the **un-upgraded Kobra goes to son** (he gets a big upgrade over the Ender) and we spend **$0 on Kobra upgrades**. Large format stays in the household (son's), just not mine and still slow.
+  - vs Route B: Kobra stays in the family instead of being sold/gutted; no custom transplant work.
+
+  | Printer | Role | Notes |
+  |---------|------|-------|
+  | **Voron 2.4 (250/300)** (mine) | Everyday + multi-material | Parts printed in PETG on Kobra, later ABS |
+  | **Kobra Max** (son's) | Large format, slow, mostly stock | Free hand-me-down; POM-wheel artifacts remain |
+  | ~~Ender 3 V3 SE~~ | Retired / rehomed | |
+
+## Is Voron the right DIY base? (platform comparison)
+
+Sanity-check against tunnel vision. For a **fun, hackable, multi-material** DIY CoreXY, the field:
+
+| Platform | DIY style | Sizes | Multi-material | Community / docs | Fit for us |
+|----------|-----------|-------|----------------|------------------|------------|
+| **Voron 2.4 / Trident** | Full DIY, self-source or kit, **you print the parts** | 250/300/350 | BoxTurtle, ERCF (native ecosystem) | Largest, best docs, most mods | **Best fit** for fun + mods + self-source decision already made |
+| **RatRig V-Core 4** (or 3.1) | **Kit** — you assemble, they supply everything incl. parts | 300/400/**500** | ERCF/BoxTurtle-compatible + their ecosystem | Solid, smaller than Voron | **Strong alt** — a big V-Core could unify large-format **and** multi-material in one build (see note) |
+| Prusa Core One | Kit or assembled; appliance-ish | ~250 | MMU-adapted | Good but less hackable | Leans "reliable" (overlaps Route D), less tinker |
+| VzBot / Annex (K3, etc.) | Expert DIY, niche sourcing | varies | DIY | Small, expert | Only if we want an esoteric build |
+| Voron clones (Troodon, Formbot kit) | Semi-assembled Voron-likes | 250–350 | ERCF/BoxTurtle | Rides Voron docs | Middle ground: less sourcing, less "scratch" |
+
+**Key insight — RatRig could collapse the fleet:** every current route treats *large format* and
+*multi-material* as **two separate machines**. A single **RatRig V-Core 4 in 400/500** could be
+BOTH — a big, enclosed, multi-material CoreXY — letting us retire the Kobra *and* skip a second
+machine. Trade-offs: it's a **kit (more $, less sourcing fun, fewer parts to print)**, community is
+smaller than Voron's, and a 500mm CoreXY is a lot of machine to tune. But if "one great printer that
+does everything" appeals more than "a specialized fleet," this is the option that delivers it.
+_(Open question added below.)_
+
 ## Route A — roadmap (costs TBD from the Sheet)
 
 ### Phase 0 — Stabilize what we have (mostly done / cheap)
@@ -148,6 +182,10 @@ Resolved: Voron model (2.4 R2), size (300), sourcing (self-BOM), MMU (BoxTurtle)
 4. **Timeline** — is this months, or a "whenever funds allow" thing?
 5. **Electronics choice for the Voron** — Octopus/Manta board class, toolhead board, Pi/CB1, stepper grade (affects cost a lot).
 6. **Ender exit** — sell / gift / hand fully to son (affects net budget — may recoup some).
+7. **Platform** — commit to Voron, or seriously price a **RatRig V-Core 4** (esp. a big 400/500 that unifies large-format + multi-material into one machine)?
+8. **Fleet shape** — a **specialized fleet** (separate big + MM machines) vs **one do-everything printer** (big multi-material CoreXY)?
+9. **Who gets the Kobra** — sold (B), kept by me + upgraded (A), or handed to son un-upgraded (F)?
+10. **Voron parts sourcing** — print in PETG then reprint ABS, vs **Print-It-Forward** ABS parts from the start.
 
 ## Cost menu (to be filled from the Sheet)
 Structured so it maps 1:1 into the Google Sheet.
