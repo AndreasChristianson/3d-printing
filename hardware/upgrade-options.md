@@ -90,6 +90,35 @@ smaller than Voron's, and a 500mm CoreXY is a lot of machine to tune. But if "on
 does everything" appeals more than "a specialized fleet," this is the option that delivers it.
 _(Open question added below.)_
 
+## Bed motion & calibration (why CoreXY, and how much "fixed bed" matters)
+
+A big motivation is escaping frequent **bed re-calibration** on the current bedslingers.
+
+**Kinematics taxonomy:**
+| Type | Bed motion | Examples |
+|------|-----------|----------|
+| Bedslinger (current) | Bed slung in **Y** each pass; gantry does X+Z | Ender, Kobra |
+| CoreXY, bed-in-Z | Bed moves **only in Z** (slow) | Voron Trident, RatRig, Bambu, Prusa |
+| CoreXY, flying gantry | Bed **fully fixed**; gantry moves in Z | **Voron 2.4** |
+
+**The honest analysis:** recalibration pain comes mostly from bedslinger mechanics + manual
+leveling (spring/knob drift, POM-wheel/eccentric wear, heavy bed slung in Y), **not** from bed
+motion per se. What actually kills recalibration is **automated tramming + probing**, which every
+modern CoreXY has:
+- Voron **2.4** → quad-Z **QGL** (auto-squares gantry to bed every print)
+- **Trident / RatRig** → triple-Z **Z-tilt** (same idea, bed side)
+- all: probe + **bed mesh** + saved Z-offset
+
+So a Trident (bed moves in Z) already gets ~90% of the "stop fiddling" benefit. What the 2.4's
+**fully-fixed** bed uniquely adds: no bed wiring/mass in motion, very repeatable bed-to-frame
+relationship, and — key — it **scales to big/heavy beds** better (move the light gantry, not a
+heavy 350 bed). **→ This is a real argument for the 2.4 specifically at 350mm (the "sell Kobra"
+world).** At 250/300, a Trident captures most of the benefit for less money/complexity.
+
+Takeaway for the menu: weight **"CoreXY + auto QGL/Z-tilt + probe,"** not "fixed bed" alone.
+Fixed-bed's standout payoff is at large sizes. (Commercial Bambu/Prusa have the best hands-off
+auto-cal of all, but they're appliances, not builds — see Route D.)
+
 ## Route A — roadmap (costs TBD from the Sheet)
 
 ### Phase 0 — Stabilize what we have (mostly done / cheap)
