@@ -49,6 +49,13 @@ Every phase should **end at a usable state**. We never want to be mid-teardown w
 printable. Each waypoint below is a place we can stop, live with the setup for months, and
 still print, so the family sees value banked at each step rather than an all-or-nothing spend.
 
+### Other routes / ideas on the menu
+Beyond A and B, options worth pricing so the family has a real menu:
+
+- **Route C — "Small Voron first" (toe in the water).** Build a cheap **Voron 0.2 / Micron** (~$300–500) as the first Voron: scratches the build itch, low approval risk, fast win. Keep the Kobra as-is for big prints; defer the big multi-material decision. Downside: V0 is tiny — a stepping stone, not the everyday MM workhorse. Could precede A or B.
+- **Route D — Pragmatic MM + fun build (split the goals).** Buy a cheap reliable multi-material commercial printer (Bambu P1S+AMS class) to own the MM workhorse role *now*, and build the Voron purely for pleasure with no daily-driver pressure. De-risks a long build; gives the family a visibly practical option (makes the fun-Voron easier to approve as the premium). Downside: another box; not a build.
+- **Route E — Modularize for approval (financing tactic, not hardware).** Present the spend as independently-approvable chunks tied to waypoints ("rails for the Kobra now, $X, better prints" → yes → "Voron frame+motion, $Y" → …). Small yeses beat one big ask. Pairs with any route.
+
 ## Route A — roadmap (costs TBD from the Sheet)
 
 ### Phase 0 — Stabilize what we have (mostly done / cheap)
@@ -173,7 +180,9 @@ for the printer + ~$150–300 for BoxTurtle, highly dependent on part grade and 
 
 ## Decisions log
 - **Voron model: 2.4 R2** — flagship flying-gantry CoreXY; the most rewarding build, which fits the "fun" motivation.
-- **Build size: 300mm** (300×300×300) — versatile "smaller than Kobra" size with room for real parts; sweet spot for everyday + multi-material.
+- **Build size: 300mm _or_ 350mm — coupled to the route (see below).**
+  - **Route A (keep Kobra): 300** — Kobra covers big prints, so no reason to pay the 350 tax (heavier gantry, slower/hotter bed, more power, longer rails/belts). No overlap needed.
+  - **Route B (sell Kobra): 350** — the Voron becomes the only larger-capable machine, so 350 buys back most of the large-format capability. Since the Kobra's full 400×425 is rarely used, 350×350×350 covers nearly all "big" jobs. The 2.4 (flying gantry + quad-Z) stays rigid at 350. Extra cost vs 300 ≈ $80–150.
 - **Sourcing: self-sourced BOM** — cheapest and the most building fun; we print our own parts (see note below).
 - **Multi-material: BoxTurtle (AFC)** — modern, actively developed Voron-ecosystem MMU with good 2025–26 community momentum.
 
