@@ -6,7 +6,9 @@ the **stable waypoints** along the way (points where money has been spent but ev
 fully usable, so we can pause indefinitely without a half-finished machine on the bench).
 
 Companion to the Google Sheet that collects links + prices. This doc holds the reasoning and
-structure; the Sheet holds the live line-item pricing. _(Sheet URL: TBD — paste here.)_
+structure; the Sheet holds the live line-item pricing. Sheet: **"Printer Upgrades"**
+(id `1mKdRK4RAgyLKfhrpuciRNTUoEUUlfIrfOBIUwMos-ms`), tabs: Stealthburner, Frame, Enclosure,
+BoxTurtle, Kobra: Stealthburner, Kobra: Linear Rails, Tools/Misc.
 
 ## Motivation
 **Fun.** The driver is the enjoyment of building and tweaking, not a production need.
@@ -273,6 +275,21 @@ for the printer + ~$150–300 for BoxTurtle, highly dependent on part grade and 
   end** (no probe). Left that price blank pending the correct product/link. (Row G4.)
 - **Sold out right now:** Cartographer V4 AIO ($39.99) and Cartographer CNC mount ($21.99) both show
   sold out — prices captured, but watch availability / have a backup probe+mount in mind.
+- **Sandwich bottom plate (decided we want one):** use **4–5 mm (3/16″–¼″) 6061** — NOT cast MIC6
+  (bottom plate isn't a datum). 2 mm is too thin (flexes, uneven pressure). It also carries the
+  kinematic bed mounts, so it needs meat to tap/bolt. Best source: **SendCutSend** cut-to-size
+  300×300 with mount holes; alt OnlineMetals / Amazon 12″×12″ 6061 (drill yourself). Add cork
+  insulation; account for added stack height/mass on the bed mounts + Z.
+- **Wire:** **FEP** (Teflon-family, 200 °C) is a fine PTFE substitute. **22 AWG** (BNTECHGO)
+  subs for the 24 AWG runs — within the Micro-Fit 20–24 AWG terminal range; **28 AWG** for fine /
+  NeoPixel runs (replaces 26 AWG silicone). Must be stranded.
+- **Micro-Fit 3.0 3-circuit** is standard **DigiKey** stock (43645-0300 recept, 43640-0300 plug,
+  43030/43031-0007 terminals) — the "scarcity" was an Amazon-only problem. 4-with-a-blank only
+  mates a 4-pin header, so match the PCB's circuit count if wiring to a fixed header.
+- **Crimper:** need a **Micro-Fit crimper** (iCrimp IWS-3220M ~$26) — the Taiss does JST/Dupont
+  only. Ball-end hex (Bondhus 10686 ~$16) is worth it for angled frame screws.
+- **Pricing tooling:** use the **ddg MCP fetch** for Amazon (WebFetch 500s there); WebFetch is fine
+  for vendor Shopify stores.
 
 ## Decisions log
 - **Voron model: 2.4 R2** — flagship flying-gantry CoreXY; the most rewarding build, which fits the "fun" motivation.
@@ -286,3 +303,26 @@ for the printer + ~$150–300 for BoxTurtle, highly dependent on part grade and 
 Self-sourcing means printing ~1–1.5 kg of parts for the 2.4. Two implications:
 - **Material:** Voron parts want **ABS/ASA** (chamber heat resistance). The Kobra Max is **open-frame**, so large ABS parts risk warping — may need a temporary enclosure, or print in ASA/PC-blend, or accept PETG for non-critical parts. **← open item.**
 - **Sequencing:** print all Voron parts **before** retiring the Ender, so we always have a working 0.4mm machine during the build. Good reason to keep the Ender until Waypoint 2a.
+
+### Toolhead / component choices (Stealthburner tab)
+- Hotend **Revo Voron** (aftermarket cold end, no PZ probe) + **Revo 60W highflow** heater/nozzle.
+- Probe/sensor **Cartographer V4** — eddy-current probe **with onboard accelerometer**, so it
+  provides input shaping too → **no separate ADXL345 needed.**
+- Extruder **Galileo 2**; **FilamATrix** filament cutter; Cartographer CNC Stealthburner mount.
+
+### Enclosure choices
+- **Panels: hybrid** — clear **PC** doors (visibility) + **ACM / foamed-PVC** opaque sides
+  (insulation + cost). Better chamber-heat retention than all-acrylic.
+- **Chamber heater: active PTC heater + fan** (chamber to 60 °C+ for ABS/ASA) — needs a
+  **chamber thermistor**, control output (heater_generic), and a **thermal fuse** (safety).
+- **Filter: Nevermore V6** recirculating activated-carbon (FYSETC kit $21.99 + ~250 g carbon +
+  printed parts). **LED chamber lighting + a chamber camera** added; skipped exhaust fan.
+
+### Multi-material (BoxTurtle) — tip handling & purge
+- **FilamATrix cutter replaces tip-forming** in AFC (configure the cutter, skip tip-form tuning) —
+  more consistent reloads; blade wear is the only new maintenance.
+- **Purge via slicer prime/wipe TOWER** (OrcaSlicer) — no physical purge bucket/poop chute needed
+  (tradeoff: bed space + time, tower must match print height). Consider purge-to-infill to cut waste.
+- Still need a **silicone nozzle brush/wiper** (cutter handles the tip; nozzle still oozes on change).
+- **Nozzle cam: skipped for the build** — fun but adds toolhead mass + sits in hotend/chamber heat +
+  maintenance; the chamber camera already covers monitoring. Optional later add.
