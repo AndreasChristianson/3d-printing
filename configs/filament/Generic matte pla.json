@@ -1,0 +1,51 @@
+{
+    "compatible_printers": [
+        "MyKlipper 0.4 nozzle"
+    ],
+    "fan_max_speed": [
+        "50"
+    ],
+    "fan_min_speed": [
+        "35"
+    ],
+    "filament_extruder_variant": [
+        "Direct Drive Standard"
+    ],
+    "filament_max_volumetric_speed": [
+        "200"
+    ],
+    "filament_retraction_length": [
+        "0.5"
+    ],
+    "filament_retraction_speed": [
+        "30"
+    ],
+    "filament_settings_id": [
+        "Generic matte pla"
+    ],
+    "filament_z_hop": [
+        "0.4"
+    ],
+    "from": "User",
+    "hot_plate_temp": [
+        "48"
+    ],
+    "hot_plate_temp_initial_layer": [
+        "50"
+    ],
+    "inherits": "Generic PLA @System",
+    "name": "Generic matte pla",
+    "nozzle_temperature": [
+        "218"
+    ],
+    "overhang_fan_speed": [
+        "70"
+    ],
+    "slow_down_layer_time": [
+        "0"
+    ],
+    "temperature_vitrification": [
+        "40"
+    ],
+    "version": "2.3.2.60"
+}
