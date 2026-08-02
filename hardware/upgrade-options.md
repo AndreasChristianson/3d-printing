@@ -70,6 +70,19 @@ Beyond A and B, options worth pricing so the family has a real menu:
   | **Kobra Max** (son's) | Large format, slow, mostly stock | Free hand-me-down; POM-wheel artifacts remain |
   | ~~Ender 3 V3 SE~~ | Retired / rehomed | |
 
+- **Route G — One big do-everything RatRig (retire the fleet).** ⭐ new. A single **RatRig V-Core 4.1 400** (kit) that is *both* large-format **and** multi-material, so it replaces the Kobra's large role AND is the MM machine — no specialized two-printer fleet needed. Kobra → son or sold; Ender retired. Trade-off: it's a kit (more $, less sourcing fun), community smaller than Voron. **Priced (user, 2026-08):**
+  | Item | SKU | Price |
+  |------|-----|-------|
+  | V-Core 4.1 – 400 – Machine 110V v1.00 | HW4368MK | **$1,299.96** (was $1,368.37, −5%) |
+  | Electronics Kit v1.00 | HW4355MK | **$729.50** |
+  | Rat Pack Large – Enclosure Filter System Kit (w/o printed parts) | HW4082GK | **$67.65** |
+  | **Subtotal (machine + electronics + enclosure)** | | **$2,097.11** |
+  | + Multi-material (ERCF/BoxTurtle) | | ~$150–300 |
+  | + Printed parts filament (enclosure etc., print on Kobra) | | ~$25–45 |
+  | **≈ all-in** | | **~$2,250–2,450** |
+
+  Context: ~2× a self-sourced Voron 2.4 300 (~$850–1500 incl. BoxTurtle), but it's **400mm, a kit (less hassle), enclosed, and one machine covers everything.** The "fleet vs one printer" decision (open item #8) is really "Voron routes vs Route G."
+
 ## Is Voron the right DIY base? (platform comparison)
 
 Sanity-check against tunnel vision. For a **fun, hackable, multi-material** DIY CoreXY, the field:
@@ -77,7 +90,7 @@ Sanity-check against tunnel vision. For a **fun, hackable, multi-material** DIY 
 | Platform | DIY style | Sizes | Multi-material | Community / docs | Fit for us |
 |----------|-----------|-------|----------------|------------------|------------|
 | **Voron 2.4 / Trident** | Full DIY, self-source or kit, **you print the parts** | 250/300/350 | BoxTurtle, ERCF (native ecosystem) | Largest, best docs, most mods | **Best fit** for fun + mods + self-source decision already made |
-| **RatRig V-Core 4** (or 3.1) | **Kit** — you assemble, they supply everything incl. parts | 300/400/**500** | ERCF/BoxTurtle-compatible + their ecosystem | Solid, smaller than Voron | **Strong alt** — a big V-Core could unify large-format **and** multi-material in one build (see note) |
+| **RatRig V-Core 4** (or 3.1) | **Kit** — you assemble, they supply everything incl. parts | 300/400/**500** | ERCF/BoxTurtle-compatible + their ecosystem | Solid, smaller than Voron | **Strong alt** — a big V-Core could unify large-format **and** multi-material in one build (see note + Route G) |
 | Prusa Core One | Kit or assembled; appliance-ish | ~250 | MMU-adapted | Good but less hackable | Leans "reliable" (overlaps Route D), less tinker |
 | VzBot / Annex (K3, etc.) | Expert DIY, niche sourcing | varies | DIY | Small, expert | Only if we want an esoteric build |
 | Voron clones (Troodon, Formbot kit) | Semi-assembled Voron-likes | 250–350 | ERCF/BoxTurtle | Rides Voron docs | Middle ground: less sourcing, less "scratch" |
@@ -244,6 +257,22 @@ for the printer + ~$150–300 for BoxTurtle, highly dependent on part grade and 
 | Panels / enclosure (acrylic/foam/hardware) | | | | | | $40–90 | 2.4 is enclosed |
 | Printed parts filament (ABS/ASA, ~1–1.5 kg) | | | | | | $25–45 | we print these |
 | **BoxTurtle (AFC) multi-material** — extrusion, steppers, board, printed parts, hardware | | | | | | $150–300 | Phase 2b |
+
+## Sourcing notes (gotchas found while pricing)
+
+- **Bed plate — you do NOT need two expensive plates.** Standard Voron bed stack (top→bottom):
+  PEI spring-steel flex sheet → magnetic base sheet → **one** cast-aluminum tooling plate
+  (MIC6/ATP-5, ~6mm, the flat datum) → **Keenovo silicone heater adhered to its underside** →
+  optional insulation. The Keenovo "sandwich" guidance is **optional** (protects the heater /
+  spreads heat). If you do sandwich, the **bottom plate is not a print surface**, so it can be
+  cheap: a thin 1–2 mm aluminum sheet or plain **6061** (not costly cast MIC6). **Cheaper still:**
+  skip the second plate and add a **cork/cotton insulation pad** under the heater — most builds do
+  this; it also improves heat-up time and efficiency. → Budget one cast plate + heater + insulation.
+- **Stealthburner cold-end link mismatch:** the "Revo w/o PZ Probe" row links to the **PZ Probe**
+  product ($79.99) — but we're probing with Cartographer, so we want the plain **Revo Voron cold
+  end** (no probe). Left that price blank pending the correct product/link. (Row G4.)
+- **Sold out right now:** Cartographer V4 AIO ($39.99) and Cartographer CNC mount ($21.99) both show
+  sold out — prices captured, but watch availability / have a backup probe+mount in mind.
 
 ## Decisions log
 - **Voron model: 2.4 R2** — flagship flying-gantry CoreXY; the most rewarding build, which fits the "fun" motivation.
