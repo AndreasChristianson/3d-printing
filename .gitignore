@@ -1,6 +1,10 @@
 *.gcode
 *.gcode.3mf
 
+# Node
+node_modules/
+npm-debug.log*
+
 .DS_Store
 *.swp
 *~

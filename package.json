@@ -1,0 +1,15 @@
+{
+  "name": "3d-printing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Marp presentation(s) for the 3D printing project",
+  "scripts": {
+    "dev": "marp --allow-local-files --server presentation",
+    "watch": "marp presentation/voron-2.4-proposal.md --allow-local-files --watch -o presentation/voron-2.4-proposal.html",
+    "build": "marp presentation/voron-2.4-proposal.md --allow-local-files -o presentation/voron-2.4-proposal.html",
+    "pdf": "marp presentation/voron-2.4-proposal.md --allow-local-files --pdf -o presentation/voron-2.4-proposal.pdf"
+  },
+  "devDependencies": {
+    "@marp-team/marp-cli": "^4.5.0"
+  }
+}
