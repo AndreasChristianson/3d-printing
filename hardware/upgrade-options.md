@@ -321,8 +321,9 @@ Self-sourcing means printing ~1–1.5 kg of parts for the 2.4. Two implications:
 ### Multi-material (BoxTurtle) — tip handling & purge
 - **FilamATrix cutter replaces tip-forming** in AFC (configure the cutter, skip tip-form tuning) —
   more consistent reloads; blade wear is the only new maintenance.
-- **Purge via slicer prime/wipe TOWER** (OrcaSlicer) — no physical purge bucket/poop chute needed
-  (tradeoff: bed space + time, tower must match print height). Consider purge-to-infill to cut waste.
+- **Purge: leaning back toward a physical purge bucket / poop chute** (keeps the plate clear,
+  faster on tall prints) rather than a slicer prime tower. Slicer tower stays available as a
+  fallback / for purge-to-infill. → add chute + bin hardware to the BoxTurtle tab.
 - Still need a **silicone nozzle brush/wiper** (cutter handles the tip; nozzle still oozes on change).
 - **Nozzle cam: skipped for the build** — fun but adds toolhead mass + sits in hotend/chamber heat +
   maintenance; the chamber camera already covers monitoring. Optional later add.
