@@ -122,12 +122,13 @@ A **250** would be cheaper — but not by much:
 
 Several ways to go — this is a family decision:
 
-| Option | Kobra | Ender | Process | You end up with |
-|--------|-------|-------|---------|-----------------|
-| **A** | Keep & specialize | Retire | Build a new Voron from scratch, upgrade the Kobra extruder and y axis | Voron for multi material, fine detail and exotic plastics + Kobra for fast prints and large prints |
-| **F** ⭐ | **Give to son** | Retire | Build a new Voron from scratch | Voron for Andreas; Kobra for Joe |
-| **B** | Strip for parts, then sell | Son keeps | Build Voron parts, get them working on the kobra. Eventually build a Voron frame and moves the parts over | Voron for Andreas; Ender for Joe |
-| **G** | Sell | Retire | Build a **RatRig 400** (~$2,250+) with a boxturtle | We share one large format, enclosed, multimaterial printer |
+| Option | Kobra                      | Ender     | Process                                                                                                   | You end up with                                                                                       |
+|--------|----------------------------|-----------|-----------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------|
+| **A**  | Keep & specialize          | Retire    | Build a new Voron from scratch, upgrade the Kobra extruder and y axis                                     | Voron for multi material, fine detail and exotic plastics + Kobra for chunky prints and large objects |
+| **F** ⭐ | Give to joe                | Retire    | Build a new Voron from scratch                                                                            | Voron for Andreas; Kobra for Joe                                                                      |
+| **B**  | Strip for parts, then sell | Joe keeps | Build Voron parts, get them working on the kobra. Eventually build a Voron frame and move the parts over. | Voron for Andreas; Ender for Joe                                                                      |
+| **G**  | Sell                       | Retire    | Build a **RatRig 400** (~$2,250+) with a boxturtle                                                        | We share one large format, enclosed, multimaterial printer                                            |
+| **H**  | Sell                       | Joe keeps | Build a new Voron from scratch. Recoup part of the cose by selling the Kobra                              | Voron for Andreas; Ender for Joe                                                                      |
 
 ---
 
@@ -138,15 +139,15 @@ Several ways to go — this is a family decision:
 | Module | Estimate |
 |--------|---------:|
 | Toolhead | ≈ $275 |
-| Frame, motion, motors & electronics | ≈ $1,095 |
-| Enclosure | ≈ $210 |
+| Frame, motion, motors, bed & electronics | ≈ $1,095 |
 | Tools *(one-time, reusable)* | ≈ $86 |
 | Fasteners, wire & connectors | ≈ $181 |
-| **Core Voron** | **≈ $1,846** |
+| **Working printer** | **≈ $1,637** |
+| + Enclosure *(later phase)* | + $208 |
 | + BoxTurtle multi-material *(later phase)* | + $190 |
 | **All-in** | **≈ $2,035** |
 
-<span class="small">Only the ~$86 of tools is truly reusable — I keep those forever, for every future print & repair.</span>
+<span class="small">Only the ~$86 of tools is truly reusable — we keep those forever, for every future print & repair. Shipping is not included.</span>
 
 ---
 
@@ -157,16 +158,16 @@ Several ways to go — this is a family decision:
 The plan is built around **waypoints** — every stage ends with a *working* printer. We can pause at any point.
 
 1. **Print the parts** on our current printers *(≈ filament only)* in petg
-2. **Frame + motion + electronics** → a moving, testable machine
-3. **Bed + enclosure** → a complete single-material Voron
+2. **Frame + motion + electronics + bed** → a **working printer** (PLA / PETG)
+3. **Enclosure** → heated chamber unlocks ABS / ASA
    - reprint in abs anything that needs to withstand heat
 4. **BoxTurtle** → multi-material
 
 ---
 
-<!-- _class: lead -->
-
 ## The ask
+
+![bg right:38%](images/voron_working.jpg)
 
 **Approval to start building a Voron 2.4 300** — in phases, ~$1,850–2,050 total, spread over time.
 
