@@ -1,0 +1,36 @@
+{
+	"compatible_printers": [
+		"MyKlipper 0.4 nozzle"
+	],
+	"default_filament_colour": [
+		"#FFFF00"
+	],
+	"filament_cost": [
+		"14"
+	],
+	"filament_extruder_variant": [
+		"Direct Drive Standard"
+	],
+	"filament_retraction_length": [
+		"1.5"
+	],
+	"filament_settings_id": [
+		"petg"
+	],
+	"from": "User",
+	"hot_plate_temp": [
+		"65"
+	],
+	"hot_plate_temp_initial_layer": [
+		"67"
+	],
+	"inherits": "Generic PETG @System",
+	"name": "petg",
+	"nozzle_temperature": [
+		"245"
+	],
+	"nozzle_temperature_initial_layer": [
+		"247"
+	],
+	"version": "2.4.0.3"
+}
