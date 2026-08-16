@@ -6,8 +6,8 @@ include <keycap_lib.scad>
 
 // --- quick toggles for viewing (override the library defaults) ---
 dish_type = "spherical";     // "cylindrical" or "spherical" — re-render to compare
-label     = "Joe";              // primary legend (top-left); e.g. "7" or "Esc"; "" = blank
-shift     = "Misti";              // shifted legend (under the primary); e.g. "&"; "" = none
-homing    = false;           // true adds the home-row tactile bar (like F/J)
+label     = "J";              // primary legend (top-left); e.g. "7" or "Esc"; "" = blank
+shift     = "";              // shifted legend (under the primary); e.g. "&"; "" = none
+homing    = true;           // true adds the home-row tactile bar (like F/J)
 
 keycap(1.00, false, label, shift, homing = homing);
