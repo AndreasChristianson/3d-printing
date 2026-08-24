@@ -1,42 +1,39 @@
 {
-    "compatible_printers": [
-        "MyKlipper 0.4 nozzle"
-    ],
-    "filament_extruder_variant": [
-        "Direct Drive Standard"
-    ],
-    "filament_max_volumetric_speed": [
-        "200"
-    ],
-    "filament_retraction_length": [
-        "0.5"
-    ],
-    "filament_retraction_speed": [
-        "30"
-    ],
-    "filament_settings_id": [
-        "Generic pla"
-    ],
-    "filament_z_hop": [
-        "0.4"
-    ],
-    "from": "User",
-    "hot_plate_temp": [
-        "48"
-    ],
-    "hot_plate_temp_initial_layer": [
-        "50"
-    ],
-    "inherits": "Generic PLA @System",
-    "name": "Generic pla",
-    "nozzle_temperature": [
-        "210"
-    ],
-    "nozzle_temperature_initial_layer": [
-        "212"
-    ],
-    "slow_down_layer_time": [
-        "0"
-    ],
-    "version": "2.3.2.60"
+	"compatible_printers": [
+		"MyKlipper 0.4 nozzle"
+	],
+	"default_filament_colour": [
+		"#21FF06"
+	],
+	"filament_cost": [
+		"12"
+	],
+	"filament_extruder_variant": [
+		"Direct Drive Standard"
+	],
+	"filament_max_volumetric_speed": [
+		"200"
+	],
+	"filament_settings_id": [
+		"Generic pla"
+	],
+	"from": "User",
+	"hot_plate_temp": [
+		"50"
+	],
+	"hot_plate_temp_initial_layer": [
+		"50"
+	],
+	"inherits": "Generic PLA @System",
+	"name": "Generic pla",
+	"nozzle_temperature": [
+		"195"
+	],
+	"nozzle_temperature_initial_layer": [
+		"195"
+	],
+	"slow_down_layer_time": [
+		"0"
+	],
+	"version": "2.3.2.60"
 }

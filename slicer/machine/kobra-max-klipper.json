@@ -34,9 +34,9 @@
 	"print_host": "http://klipper2",
 	"printable_area": [
 		"0x0",
-		"402x0",
-		"402x425",
-		"0x425"
+		"380x0",
+		"380x415",
+		"0x415"
 	],
 	"printable_height": "395",
 	"printer_extruder_id": [
@@ -47,7 +47,7 @@
 	],
 	"printer_settings_id": "kobra-max-klipper",
 	"retraction_length": [
-		"0.5"
+		"0.6"
 	],
 	"version": "2.3.2.60"
 }

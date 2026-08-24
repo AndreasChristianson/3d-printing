@@ -8,11 +8,17 @@
 	"filament_cost": [
 		"14"
 	],
+	"filament_deretraction_speed": [
+		"30"
+	],
 	"filament_extruder_variant": [
 		"Direct Drive Standard"
 	],
 	"filament_retraction_length": [
-		"1.5"
+		"1.4"
+	],
+	"filament_retraction_speed": [
+		"45"
 	],
 	"filament_settings_id": [
 		"petg"
@@ -27,10 +33,10 @@
 	"inherits": "Generic PETG @System",
 	"name": "petg",
 	"nozzle_temperature": [
-		"245"
+		"250"
 	],
 	"nozzle_temperature_initial_layer": [
-		"247"
+		"250"
 	],
 	"version": "2.4.0.3"
 }

@@ -39,7 +39,15 @@ for kind in machine filament process; do
   for src in "$src_dir"/*.json; do
     name="$(basename "$src")"
     cp "$src" "$dst_dir/$name"
-    echo "copied: $kind/$name"
+
+    # Machine profiles can carry a print-host API key (OctoPrint/Klipper). Keep the
+    # real value in OrcaSlicer's user dir only; the tracked copy gets REDACTED.
+    if grep -q '"printhost_apikey"' "$dst_dir/$name"; then
+      sed -i '' -E 's/("printhost_apikey"[[:space:]]*:[[:space:]]*)"[^"]*"/\1"REDACTED"/' "$dst_dir/$name"
+      echo "copied: $kind/$name (printhost_apikey redacted)"
+    else
+      echo "copied: $kind/$name"
+    fi
     copied=$((copied + 1))
   done
   shopt -u nullglob
