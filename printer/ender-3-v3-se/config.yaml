@@ -1,0 +1,87 @@
+api:
+  key: REDACTED  # secret — real value lives only on the pi (~/.octoprint/config.yaml)
+feature:
+  modelSizeDetection: false
+plugins:
+  _disabled:
+  - achievements
+  - filamentreload
+  announcements:
+    _config_version: 1
+    channels:
+      _blog:
+        read_until: 1744887600
+      _important:
+        read_until: 1698310200
+      _octopi:
+        read_until: 1746515700
+      _plugins:
+        read_until: 1745193600
+      _releases:
+        read_until: 1749553200
+  classicwebcam:
+    _config_version: 1
+    stream: http://octopi3:1984/api/stream.mjpeg?src=picam
+  discovery:
+    upnpUuid: da4bb4c9-f0b7-4b3f-ae1f-05d6744e7be0
+  errortracking:
+    unique_id: 742dcbb9-9ddb-4af1-81e4-e12fdd5301c2
+  filamentreload:
+    mode: '1'
+    pin: '17'
+    pullup: '0'
+    switch: '0'
+  filamentsensorsimplified:
+    cmd_action: '1'
+    gpio_mode: '11'
+    pin: '17'
+    power: '1'
+    triggered: '0'
+  gcodeviewer:
+    _config_version: 1
+  gpiostatus:
+    compact_view: false
+    hide_physical: true
+    show_notes: true
+  pi_support:
+    ignore_undervoltage_on_printstart: true
+  pluginmanager:
+    repository_restricted: false
+  softwareupdate:
+    _config_version: 9
+  tracking:
+    enabled: false
+    unique_id: c0bd43eb-0d74-4680-a95b-8880088d64c2
+  virtual_printer:
+    _config_version: 1
+printerProfiles:
+  default: _default
+serial:
+  autoconnect: true
+  baudrate: 115200
+server:
+  commands:
+    serverRestartCommand: sudo service octoprint restart
+    systemRestartCommand: sudo reboot now
+  firstRun: false
+  host: 127.0.0.1
+  onlineCheck:
+    enabled: true
+  pluginBlacklist:
+    enabled: true
+  secretKey: REDACTED  # secret — real value lives only on the pi (~/.octoprint/config.yaml)
+  seenWizards:
+    backup: null
+    classicwebcam: 1
+    corewizard: 4
+    tracking: null
+temperature:
+  profiles:
+  - bed: 100
+    chamber: null
+    extruder: 210
+    name: ABS
+  - bed: 60
+    chamber: null
+    extruder: 180
+    name: PLA

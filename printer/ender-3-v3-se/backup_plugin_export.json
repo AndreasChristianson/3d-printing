@@ -1,0 +1,20 @@
+[
+  {
+    "key": "gpiostatus",
+    "name": "GPIO-Status",
+    "url": "https://github.com/danieleborgo/OctoPrint-GPIOStatus",
+    "archive": "https://github.com/danieleborgo/OctoPrint-GPIOStatus/archive/master.zip"
+  },
+  {
+    "key": "filamentsensorsimplified",
+    "name": "Filament Sensor Simplified",
+    "url": "https://github.com/luckyx182/Filament_sensor_simplified",
+    "archive": "https://github.com/LuckyX182/Filament_sensor_simplified/archive/master.zip"
+  },
+  {
+    "key": "filamentreload",
+    "name": "Filament Sensor Reloaded",
+    "url": "https://github.com/nickmitchko/Octoprint-Filament-Reloaded",
+    "archive": "https://github.com/nickmitchko/Octoprint-Filament-Reloaded/archive/master.zip"
+  }
+]
