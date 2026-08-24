@@ -5,20 +5,32 @@ Git-tracked OrcaSlicer configs for a modded Anycubic Kobra Max running Klipper (
 ## Layout
 
 ```
-configs/
-  machine/    # printer definitions (bed size, kinematics, start/end gcode for Klipper)
-  filament/   # per-material profiles (temps, flow, retraction)
-  process/    # per-print profiles (layer height, infill, supports, speed)
-models/       # STL / 3MF inputs (commit small ones; consider git-lfs for large)
-docs/         # reference notes (e.g., Cura-extracted settings)
-sync-from-orca.sh  # copy GUI-saved profiles into configs/ for git review
+slicer/         # OrcaSlicer host-side profiles (slicing settings)
+  machine/      # printer definitions (bed size, kinematics, start/end gcode for Klipper)
+  filament/     # per-material profiles (temps, flow, retraction)
+  process/      # per-print profiles (layer height, infill, supports, speed)
+printer/        # on-machine host/firmware configs, one dir per printer
+  kobra-max/    # Klipper configs from klipper2 (printer.cfg, moonraker.conf, ...)
+  ender-3-v3-se/ # OctoPrint configs from octopi3 (config.yaml, printerProfiles/, ...)
+models/         # STL / 3MF inputs (commit small ones; consider git-lfs for large)
+docs/           # reference notes (e.g., Cura-extracted settings)
+sync-from-orca.sh  # copy GUI-saved profiles into slicer/ for git review
 ```
+
+Slicer configs (host/OrcaSlicer) and printer configs (on-machine/Klipper or OctoPrint) are
+kept separate on purpose: they live in different places, change for different reasons, and
+`sync-from-orca.sh` only touches the `slicer/` side.
+
+**Secrets:** printer configs can contain credentials (OctoPrint API keys, session secret
+keys, user password hashes). Tracked files have those values replaced with `REDACTED` — the
+real values live only on the pi. Purely-credential files (`users.yaml`, `config.backup`) are
+git-ignored and never imported.
 
 ## Workflow
 
 1. Tune profiles in OrcaSlicer's GUI as you iterate on prints.
-2. Run `./sync-from-orca.sh` to copy the current profiles from OrcaSlicer's app-support dir into `configs/`.
-3. `git diff configs/` to review, then commit.
+2. Run `./sync-from-orca.sh` to copy the current profiles from OrcaSlicer's app-support dir into `slicer/`.
+3. `git diff slicer/` to review, then commit.
 4. Slice and send to the printer from inside OrcaSlicer (it knows about `klipper2` via the printer profile's `print_host`).
 
 ## Installing OrcaSlicer (macOS)

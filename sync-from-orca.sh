@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copy OrcaSlicer user profiles from its app-support dir into configs/.
+# Copy OrcaSlicer user profiles from its app-support dir into slicer/.
 # Run this after editing profiles in the OrcaSlicer GUI to stage them for git.
 #
 # Usage:
@@ -8,7 +8,7 @@
 #   ./sync-from-orca.sh --quiet   # copy, no diff output
 #
 # Only .json files are copied; OrcaSlicer's .info sidecars are skipped.
-# Existing files in configs/ are overwritten — review with `git diff` before committing.
+# Existing files in slicer/ are overwritten — review with `git diff` before committing.
 
 set -euo pipefail
 
@@ -27,7 +27,7 @@ fi
 copied=0
 for kind in machine filament process; do
   src_dir="$ORCA_USER_DIR/$kind"
-  dst_dir="$REPO_DIR/configs/$kind"
+  dst_dir="$REPO_DIR/slicer/$kind"
   mkdir -p "$dst_dir"
 
   if [[ ! -d "$src_dir" ]]; then
@@ -52,6 +52,6 @@ fi
 
 if [[ "$QUIET" -eq 0 ]] && command -v git >/dev/null 2>&1 && [[ -d "$REPO_DIR/.git" ]]; then
   echo
-  echo "--- changes in configs/ ---"
-  git -C "$REPO_DIR" diff --stat -- configs/ || true
+  echo "--- changes in slicer/ ---"
+  git -C "$REPO_DIR" diff --stat -- slicer/ || true
 fi

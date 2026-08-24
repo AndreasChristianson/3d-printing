@@ -16,3 +16,8 @@ npm-debug.log*
 # Scoped to scad/ so the git-LFS model library under models/ stays tracked.
 scad/**/*.stl
 scad/**/*.png
+
+# Printer config secrets — never commit these (OctoPrint credentials / hashes).
+# Tracked config files have their secret values redacted; the real ones stay on the pi.
+printer/**/users.yaml
+printer/**/config.backup
