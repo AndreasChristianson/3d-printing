@@ -26,7 +26,7 @@
 		"50",
 		"200"
 	],
-	"machine_start_gcode": ";Nozzle diameter = [nozzle_diameter]\n;Filament type = [filament_type]\n;Filament name = [filament_vendor]\n;Filament weight = [filament_density]\n\nM220 S100 ;Reset Feedrate\nM221 S100 ;Reset Flowrate\n\nM140 S[bed_temperature_initial_layer_single]; Start heating the bed (without waiting)\nM104 S[nozzle_temperature_initial_layer]; Start heating the hotend (without waiting)\n\nG28 ;Home\nG90 ; Use absolute positioning\nG92 E0 ;Reset Extruder\nCLEAR_PAUSE;\n\n;M420 S1 ; turn on bed mesh leveling\nBED_MESH_PROFILE LOAD=default\n\nG0 X5 Y5 Z0.28 F5000.0 ;Move to start position\n\nM190 S[bed_temperature_initial_layer_single]; Wait for the bed to reach temperature\nM109 S[nozzle_temperature_initial_layer]; Wait for the hotend to reach temperature\n\nG1 X5 Y300.0 Z0.28 E20 F1000 ;Draw the first line\nG1 X5.4 Y300.0 Z0.28 F1000;Move to side a little\nG1 X5.4 Y5 Z0.28 E40 F1000;Draw the second line\n\nG4 P2000\nG91\nG0 Z4.0 F1000 E-1 ;retract\nG90\nG4 P2000\n\nG92 E0  ;Reset Extruder\n",
+	"machine_start_gcode": ";Nozzle diameter = [nozzle_diameter]\n;Filament type = [filament_type]\n;Filament name = [filament_vendor]\n;Filament weight = [filament_density]\n\nM220 S100 ;Reset Feedrate\nM221 S100 ;Reset Flowrate\n\nM140 S[bed_temperature_initial_layer_single]; Start heating the bed (without waiting)\nM104 S150\n\nG28 ;Home\nG90 ; Use absolute positioning\nG92 E0 ;Reset Extruder\nCLEAR_PAUSE;\n\nM190 S[bed_temperature_initial_layer_single]; Wait for the bed to reach temperature\nM109 S150 ;\n\nAFC_BRUSH\nCARTOGRAPHER_TOUCH_HOME ; Home for real Z0\nM104 S[nozzle_temperature_initial_layer];\nBED_MESH_CALIBRATE\n;M420 S1\nSKEW_PROFILE LOAD=default\n\nG0 X5 Y5 Z0.28 F5000.0 ;Move to start position\nM109 S[nozzle_temperature_initial_layer]; Wait for the hotend to reach temperature\n\nG1 X5 Y100.0 Z0.28 E8 F800 ;Draw the first line\nG1 X5.4 Y100.0 Z0.28 F800;Move to side a little\nG1 X5.4 Y5 Z0.28 E16 F800;Draw the second line\n\nG91\nG0 Z4.0 F1000 E-.2 ;retract\nG90\n\nG92 E0  ;Reset Extruder\n",
 	"name": "kobra-max-klipper",
 	"nozzle_type": [
 		"hardened_steel"
@@ -34,11 +34,11 @@
 	"print_host": "http://klipper2",
 	"printable_area": [
 		"0x0",
-		"380x0",
-		"380x415",
+		"366x0",
+		"366x415",
 		"0x415"
 	],
-	"printable_height": "395",
+	"printable_height": "270",
 	"printer_extruder_id": [
 		"1"
 	],

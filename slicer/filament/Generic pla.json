@@ -1,9 +1,9 @@
 {
-	"compatible_printers": [
-		"MyKlipper 0.4 nozzle"
-	],
 	"default_filament_colour": [
 		"#21FF06"
+	],
+	"enable_pressure_advance": [
+		"1"
 	],
 	"filament_cost": [
 		"12"
@@ -11,11 +11,17 @@
 	"filament_extruder_variant": [
 		"Direct Drive Standard"
 	],
+	"filament_flow_ratio": [
+		"0.92"
+	],
 	"filament_max_volumetric_speed": [
 		"200"
 	],
 	"filament_settings_id": [
 		"Generic pla"
+	],
+	"filament_shrink": [
+		"99.56%"
 	],
 	"from": "User",
 	"hot_plate_temp": [
@@ -30,7 +36,10 @@
 		"195"
 	],
 	"nozzle_temperature_initial_layer": [
-		"195"
+		"200"
+	],
+	"pressure_advance": [
+		"0.0514"
 	],
 	"slow_down_layer_time": [
 		"0"

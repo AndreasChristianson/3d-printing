@@ -2,9 +2,6 @@
 	"filament_extruder_variant": [
 		"Direct Drive Standard"
 	],
-	"filament_flow_ratio": [
-		"1.01"
-	],
 	"filament_settings_id": [
 		"Generic PLA @Ender-3V3"
 	],
