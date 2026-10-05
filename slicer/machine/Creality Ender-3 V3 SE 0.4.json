@@ -1,6 +1,8 @@
 {
 	"from": "User",
 	"inherits": "Creality Ender-3 V3 SE 0.4 nozzle",
+	"input_shaping_type": "ZV",
+	"machine_start_gcode": "M220 S100 ;Reset Feedrate \nM221 S100 ;Reset Flowrate \n \nM104 S[nozzle_temperature_initial_layer] ;Set final nozzle temp \nM190 S[bed_temperature_initial_layer_single] ;Set and wait for bed temp to stabilize \nG28 ;Home \nM420 S1 ;Enable saved bed mesh\nG92 E0 ;Reset Extruder \nG1 Z2.0 F3000 ;Move Z Axis up \nG1 X-2.1 Y20 Z0.28 F5000.0 ;Move to start position \nM109 S[nozzle_temperature_initial_layer] ;Wait for nozzle temp to stabilize \nG1 X-2.1 Y145.0 Z0.28 F1500.0 E15 ;Draw the first line \nG1 X-2.4 Y145.0 Z0.28 F5000.0 ;Move to side a little \nG1 X-2.4 Y20 Z0.28 F1500.0 E30 ;Draw the second line \nG92 E0  ;Reset Extruder \nG1 E-1.0000 F1800 ;Retract a bit \nG1 Z2.0 F3000 ;Move Z Axis up \nG1 E0.0000 F1800",
 	"name": "Creality Ender-3 V3 SE 0.4",
 	"print_host": "http://octopi3",
 	"printer_extruder_id": [
