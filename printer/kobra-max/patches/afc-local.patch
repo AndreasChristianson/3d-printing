@@ -1,0 +1,66 @@
+diff --git a/extras/AFC_HTLF.py b/extras/AFC_HTLF.py
+index 16f83d4..3985abb 100644
+--- a/extras/AFC_HTLF.py
++++ b/extras/AFC_HTLF.py
+@@ -66,7 +66,7 @@ class AFC_HTLF(afcBoxTurtle):
+             self.home_sensor, _ = add_filament_switch(f"{self.name}_home_pin", self.home_pin,
+                                                       self.printer, self.enable_sensors_in_gui )
+ 
+-            ppins.allow_multi_use_pin(self.home_pin.strip("!^"))
++            ppins.allow_multi_use_pin(self.home_pin.strip("!^~"))
+             ppins.parse_pin(self.home_pin, True, True)
+             self.home_endstop = ppins.setup_pin('endstop', self.home_pin)
+             self.home_endstop_name = f"{self.name}_home"
+diff --git a/extras/AFC_lane.py b/extras/AFC_lane.py
+index f6b98e2..0a4dc72 100644
+--- a/extras/AFC_lane.py
++++ b/extras/AFC_lane.py
+@@ -532,7 +532,7 @@ class AFCLane:
+         if pin is not None and pin.strip().lower() == "virtual":
+             return
+ 
+-        ppins.allow_multi_use_pin(pin.strip("!^"))
++        ppins.allow_multi_use_pin(pin.strip("!^~"))
+         ppins.parse_pin(pin, True, True)
+         endstop = ppins.setup_pin('endstop', pin)
+         endstop_name = f"{self.name}_{name}"
+diff --git a/extras/AFC_stepper.py b/extras/AFC_stepper.py
+index 504aa4b..afd34b3 100644
+--- a/extras/AFC_stepper.py
++++ b/extras/AFC_stepper.py
+@@ -663,7 +663,7 @@ class AFCExtruderStepper(AFCLane):
+                 return
+             # Normalize and create endstop
+             try:
+-                self._ppins.allow_multi_use_pin(pin.strip("!^"))
++                self._ppins.allow_multi_use_pin(pin.strip("!^~"))
+                 self._ppins.parse_pin(pin, True, True)
+                 mcu_endstop = self._ppins.setup_pin('endstop', pin)
+             except Exception as e:
+diff --git a/extras/AFC_unit.py b/extras/AFC_unit.py
+index 3d7cfa5..a23d3f7 100644
+--- a/extras/AFC_unit.py
++++ b/extras/AFC_unit.py
+@@ -885,8 +885,7 @@ class afcUnit:
+         # Adding in check to make sure distance is greater than load_undershoot value for lane
+         # when load_then_home is enabled
+         load_and_home = lane.load_then_home_var and distance > lane.load_undershoot
+-        if (load_and_home
+-            and lane.extruder_obj.tool_start == "buffer"):
++        if load_and_home:
+             load_length = distance - lane.load_undershoot
+             home, dist, warn = lane.move_to(load_length, speed_mode, assist_active=assist_active,
+                                             endstop=endstop, use_homing=False)
+diff --git a/extras/AFC_utils.py b/extras/AFC_utils.py
+index 2d5ca9e..f3d8d53 100644
+--- a/extras/AFC_utils.py
++++ b/extras/AFC_utils.py
+@@ -64,7 +64,7 @@ def add_filament_switch(switch_name: str, switch_pin: str, printer: Printer,
+     import configfile
+     new_switch_name = f"filament_switch_sensor {switch_name}"
+     ppins = printer.lookup_object('pins')
+-    ppins.allow_multi_use_pin(switch_pin.strip("!^"))
++    ppins.allow_multi_use_pin(switch_pin.strip("!^~"))
+     filament_switch_config = configparser.RawConfigParser()
+     filament_switch_config.add_section( new_switch_name )
+     filament_switch_config.set( new_switch_name, 'switch_pin', switch_pin)
