@@ -4,6 +4,7 @@
 	"brim_type": "no_brim",
 	"combine_brims": "1",
 	"default_acceleration": "900",
+	"enable_prime_tower": "0",
 	"ensure_vertical_shell_thickness": "ensure_moderate",
 	"filename_format": "{input_filename_base}_{filament_type[initial_tool]}_{printer_model}_{scale[0]}.gcode",
 	"from": "User",

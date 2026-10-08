@@ -4,6 +4,7 @@
 	"brim_object_gap": "0.07",
 	"brim_type": "outer_only",
 	"default_acceleration": "500",
+	"enable_prime_tower": "0",
 	"ensure_vertical_shell_thickness": "ensure_moderate",
 	"filename_format": "{input_filename_base}_{filament_type[initial_tool]}_{printer_model}_{scale[0]}.gcode",
 	"fill_multiline": "2",
