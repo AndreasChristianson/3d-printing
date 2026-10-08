@@ -21,3 +21,7 @@ scad/**/*.png
 # Tracked config files have their secret values redacted; the real ones stay on the pi.
 printer/**/users.yaml
 printer/**/config.backup
+
+# Claude Code per-user/local state (project skills under .claude/skills are tracked)
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
