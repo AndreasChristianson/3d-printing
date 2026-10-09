@@ -17,6 +17,9 @@
 	"filament_extruder_variant": [
 		"Direct Drive Standard"
 	],
+	"filament_flow_ratio": [
+		"0.94"
+	],
 	"filament_max_volumetric_speed": [
 		"200"
 	],
@@ -45,7 +48,7 @@
 	"inherits": "Generic PLA @System",
 	"name": "Generic matte pla",
 	"nozzle_temperature": [
-		"218"
+		"217"
 	],
 	"overhang_fan_speed": [
 		"70"
