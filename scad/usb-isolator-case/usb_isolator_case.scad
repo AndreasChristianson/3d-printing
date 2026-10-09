@@ -8,7 +8,7 @@
 // - Male-A end: a sleeve the black cable's female overmold slides into.
 // - Female-A end: the case end is flush with the receptacle mouth and the opening only
 //   clears the metal shell, so any plug's overmold seats against the socket as normal.
-// - Lid and base join with 4x M3 x 16 through side ears into M3 heat-set inserts
+// - Lid and base join with 4x M3 x 10 (heads sunk) through side ears into M3 heat-set inserts
 //   (5 mm OD x 4 mm) pressed into the top of the base ears.
 // - Mounting: a flange along the +X side, flush with the base bottom, with 2x M3 holes
 //   on a 2020 slot centreline. Screw the flange to the extrusion face and the case
@@ -47,15 +47,18 @@ fa_flush    = 0.2;    // case end face sits this far behind the receptacle mouth
 split_z  = pcb_top;   // base/lid parting plane: PCB top face
 stop_h   = 1.3;       // male-end stop rises to just under the PCB top face
 stop_t   = 1.5;       // male-end stop thickness (overmold seats against it)
+stop_ma_drop = 2.0;   // stop is this much lower under the male plug (plug sits into the PCB)
+rib_press = 0.5;      // lid ribs reach this far below the USB shell tops (preload)
 pad      = 2.0;       // corner support pad size
 
 // Lid screws
 m3_hole   = 3.4;
-m3_head_d = 6.0;
+m3_head_d = 6.5;      // socket head 5.5 mm + clearance
+m3_head_h = 3.0;
 insert_hole  = 4.1;   // heat-set pilot for 5 mm OD M3 inserts (check the insert's spec)
 insert_depth = 4.0;
 insert_extra = 1.0;   // pocket deeper than the insert so melt has somewhere to go
-screw_len = 16;       // lid-to-base screws (M3 x 16)
+screw_len = 10;       // lid-to-base screws (M3 x 10 socket head, sunk below the lid top)
 ear_r     = 4.5;
 ear_off   = 4.0;      // hole centre outside the case side face
 ear_y     = [-4, 37];
@@ -99,7 +102,7 @@ assert(box_y1 - cav_y1 >= 1.2, "female end wall too thin");
 insert_z0    = split_z - insert_depth - insert_extra;   // bottom of the insert pocket
 screw_tip_z  = split_z - insert_depth + 0.5;            // 3.5 mm of thread engaged
 screw_seat_z = screw_tip_z + screw_len;
-assert(screw_seat_z <= box_z1, "screw_len too long for the case height");
+assert(screw_seat_z + m3_head_h <= box_z1 - 0.5, "screw heads would stand proud of the lid: shorten screw_len");
 assert(screw_seat_z >= split_z + 4, "screw_len too short: lid flange under the head too thin");
 
 ear_xs = [box_x0 - ear_off, box_x1 + ear_off];
@@ -161,8 +164,9 @@ module cavity() {
     // male-A sleeve: overmold pocket, open at the end, running up to the board edge
     xz_rrect(ma_open_c, ma_plug_w, ma_plug_h, plug_r, sleeve_y0 - 1, cav_y0 + 0.01);
 
-    // female-A opening: shell clearance through the end wall
-    box([fa_open0[0], cav_y1 - 0.01, fa_open0[1]], [fa_open1[0], box_y1 + 1, fa_open1[1]]);
+    // female-A opening: shell clearance through the end wall, open down to the parting
+    // plane so the lid has nothing between the receptacle and the PCB
+    box([fa_open0[0], cav_y1 - 0.01, split_z], [fa_open1[0], box_y1 + 1, fa_open1[1]]);
 }
 
 // Solid bits added back inside the voids
@@ -170,7 +174,11 @@ module inner_features() {
     // male-end stop: stops the PCB edge and the cable overmold
     intersection() {
         xz_rrect(ma_open_c, ma_plug_w, ma_plug_h, plug_r, cav_y0 - stop_t, cav_y0);
-        box([box_x0, cav_y0 - stop_t, box_z0], [box_x1, cav_y0, stop_h]);
+        difference() {
+            box([box_x0, cav_y0 - stop_t, box_z0], [box_x1, cav_y0, stop_h]);
+            box([ma_x - ma_w/2 - clr, cav_y0 - stop_t - 1, stop_h - stop_ma_drop],
+                [ma_x + ma_w/2 + clr, cav_y0 + 1, stop_h + 1]);
+        }
     }
 
     // corner support pads
@@ -178,8 +186,8 @@ module inner_features() {
         box([x, y, cav_z0 - 0.01], [x == cav_x0 ? pad : cav_x1, y == cav_y0 ? pad : cav_y1, 0]);
 
     // lid hold-down ribs on the USB shells
-    box([ma_x - ma_w/2 + 1, 0.5, pcb_top + ma_h], [ma_x + ma_w/2 - 1, ma_inboard - 0.5, cav_z1 + 0.01]);
-    box([fa_x - fa_w/2 + 1, fa_y0 + 2, pcb_top + fa_z + fa_h], [fa_x + fa_w/2 - 1, pcb_l - 1, cav_z1 + 0.01]);
+    box([ma_x - ma_w/2 + 1, 0.5, ma_top_z - rib_press], [ma_x + ma_w/2 - 1, ma_inboard - 0.5, cav_z1 + 0.01]);
+    box([fa_x - fa_w/2 + 1, fa_y0 + 2, fa_top_z - rib_press], [fa_x + fa_w/2 - 1, pcb_l - 1, cav_z1 + 0.01]);
 
     led_shrouds();
 }
@@ -227,7 +235,13 @@ module case_body() {
 
 /* ---------- Parts ---------- */
 module base() intersection() { case_body(); box([-100, -100, box_z0 - 1], [100, 100, split_z]); }
-module lid()  intersection() { case_body(); box([-100, -100, split_z], [100, 100, box_z1 + 1]); }
+module lid()
+    difference() {
+        intersection() { case_body(); box([-100, -100, split_z], [100, 100, box_z1 + 1]); }
+        // female-A opening again, overshooting the parting plane so no zero-thickness
+        // skin is left under the receptacle (the base keeps its board stop)
+        box([fa_open0[0], cav_y1 - 0.01, split_z - 1], [fa_open1[0], box_y1 + 1, fa_open1[1]]);
+    }
 
 if (part == "base") {
     translate([0, 0, -box_z0]) base();

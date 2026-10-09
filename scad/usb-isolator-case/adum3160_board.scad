@@ -39,15 +39,16 @@ fa_x        = 3.4 + fa_w/2;   // 3.4 mm gap on the left, 6.0 on the right
 
 // Male USB-A plug (host side, black cable's female socket slides on)
 ma_w        = 12.0;   // (std)
-ma_h        = 4.5;    // (std)
+ma_z        = -0.75;  // shell bottom vs PCB top face: sits ~half way down into the PCB (v1 test fit)
+ma_h        = 5.25;   // keeps the shell top at 4.5 mm above the PCB, as fitted in v1
 ma_protrude = 15.5;   // metal past the PCB edge
 ma_inboard  = 5.0;    // (est) body on the PCB
 ma_x        = pcb_w/2;   // (est) centred
 
 // Small parts (est, from the top photo)
 dip_x = 0.5;  dip_y = 1.4;  dip_w = 3.5;  dip_l = 9.5;  dip_h = 5.5;
-led_red  = [18.0, pcb_l - 1.5];   // power LED, female-A end
-led_blue = [ 7.5, 12.9];          // status LED, middle
+led_red  = [19.0, pcb_l - 2.5];   // power LED, female-A end (v1 test fit: +1 X, -1 Y)
+led_blue = [ 7.5, 11.9];          // status LED, middle    (v1 test fit: -1 Y)
 led_sz = [1.6, 0.8, 0.6];
 
 /* ---------- Derived (used by the case) ---------- */
@@ -56,7 +57,9 @@ fa_y0      = pcb_l - fa_len + fa_overhang;
 fa_mouth_y = pcb_l + fa_overhang;
 ma_tip_y   = -ma_protrude;
 fa_axis_z  = pcb_top + fa_z + fa_h/2;
-ma_axis_z  = pcb_top + ma_h/2;
+ma_axis_z  = pcb_top + ma_z + ma_h/2;
+ma_top_z   = pcb_top + ma_z + ma_h;
+fa_top_z   = pcb_top + fa_z + fa_h;
 dcdc_y0    = pcb_l - dcdc_from_fa - dcdc_l;
 board_top  = pcb_top + dcdc_top;   // highest point
 
@@ -70,7 +73,7 @@ module female_a()
 
 module male_a()
     color("LightGray")
-    translate([ma_x - ma_w/2, -ma_protrude, pcb_top]) cube([ma_w, ma_protrude + ma_inboard, ma_h]);
+    translate([ma_x - ma_w/2, -ma_protrude, pcb_top + ma_z]) cube([ma_w, ma_protrude + ma_inboard, ma_h]);
 
 module dcdc()
     color("DimGray")
