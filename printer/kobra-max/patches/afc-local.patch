@@ -11,6 +11,26 @@ index 16f83d4..3985abb 100644
              ppins.parse_pin(self.home_pin, True, True)
              self.home_endstop = ppins.setup_pin('endstop', self.home_pin)
              self.home_endstop_name = f"{self.name}_home"
+diff --git a/extras/AFC_buffer.py b/extras/AFC_buffer.py
+index c7ec59d..46f66d8 100644
+--- a/extras/AFC_buffer.py
++++ b/extras/AFC_buffer.py
+@@ -269,6 +269,15 @@ class AFCBuffer:
+         :param eventtime: Current event time from reactor
+         :return float: Next scheduled event time (eventtime + CHECK_RUNOUT_TIMEOUT)
+         """
++        # A switched buffer can only be faulted while one of its end switches is held.
++        # stop_fault_timer() called while this callback is blocked in PAUSE gets undone by
++        # our return value re-arming the timer, so stop here once both switches are open.
++        if (self.type == "switched"
++            and not self.advance_state
++            and not self.trailing_state):
++            self.fault_timer = "Stopped"
++            return self.reactor.NEVER
++
+         extruder_pos = self.get_extruder_pos()
+ 
+         stepper_less_drive = False
 diff --git a/extras/AFC_lane.py b/extras/AFC_lane.py
 index f6b98e2..0a4dc72 100644
 --- a/extras/AFC_lane.py
