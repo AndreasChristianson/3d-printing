@@ -1,7 +1,7 @@
 {
 	"alternate_extra_wall": "1",
 	"brim_object_gap": "0.07",
-	"brim_type": "inner_only",
+	"brim_type": "no_brim",
 	"combine_brims": "1",
 	"default_acceleration": "900",
 	"enable_prime_tower": "0",
