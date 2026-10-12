@@ -1,3 +1,24 @@
+diff --git a/extras/AFC.py b/extras/AFC.py
+index 9553d15..9d37f9d 100644
+--- a/extras/AFC.py
++++ b/extras/AFC.py
+@@ -212,6 +212,7 @@ class afc:
+         self.kick_cmd               = config.get('kick_cmd', None)                  # Macro to use when kicking. Change macro name if you would like to use your own kick macro
+         self.wipe                   = config.getboolean("wipe", False)              # Set to True to enable nozzle wiping after lane loads
+         self.wipe_cmd               = config.get('wipe_cmd', None)                  # Macro to use when nozzle wiping. Change macro name if you would like to use your own wipe macro
++        self.wipe_after_poop        = config.getboolean("wipe_after_poop", True)    # LOCAL PATCH: False skips the wipe between poop and kick (the post-kick wipe still runs)
+         self.poop                   = config.getboolean("poop", False)              # Set to True to enable pooping(purging color) after lane loads
+         self.poop_cmd               = config.get('poop_cmd', None)                  # Macro to use when pooping. Change macro name if you would like to use your own poop/purge macro
+         self.enable_standalone_purge: bool = config.getboolean("enable_standalone_purge", True)
+@@ -1403,7 +1404,7 @@ class afc:
+             self.afcDeltaTime.log_with_time("TOOL_LOAD: After poop")
+             self.function.log_toolhead_pos()
+ 
+-            if self.wipe:
++            if self.wipe and self.wipe_after_poop:
+                 self.gcode.run_script_from_command("{} EXTRUDER={}".format(self.wipe_cmd, cur_extruder.name))
+                 self.afcDeltaTime.log_with_time("TOOL_LOAD: After first wipe")
+                 self.function.log_toolhead_pos()
 diff --git a/extras/AFC_HTLF.py b/extras/AFC_HTLF.py
 index 16f83d4..3985abb 100644
 --- a/extras/AFC_HTLF.py
