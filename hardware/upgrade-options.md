@@ -141,7 +141,7 @@ Keep both current printers healthy; small maintenance spend.
 - [x] Y idlers/tensioners replaced (done)
 - [ ] X idler swap (part on order)
 - [ ] Re-adhere/replace Kobra PEI magnetic base
-- [ ] Secure PTFE couplings (dry box / EIBOS → extruder)
+- [x] Secure PTFE couplings (dry box / EIBOS → extruder) — printed coupler
 - [ ] OctoPrint update + storage cleanup (Ender)
 - **Waypoint 0:** both printers reliable, single-material, as-is. _Est: $_
 
@@ -150,7 +150,7 @@ Commit the Kobra to its end-state role.
 - [ ] Large nozzle(s) — 0.6 / 0.8 mm hardened _(has some hardened nozzles already)_
 - [ ] Tune high-flow single-material profiles in Orca (large layer heights)
 - [ ] (Optional) hotend flow upgrade if the Micro Swiss all-metal limits volumetric rate
-- [ ] (Optional) input shaping — add an ADXL345/accelerometer (none present today)
+- [~] (Optional) input shaping — X done via Cartographer's ADXL345 (mzv @ 56.6 Hz); Y needs a bed-mounted accelerometer (bed-slinger)
 - **Waypoint 1:** Kobra is the "big + coarse + fast" machine. Ender still covers 0.4 mm. _Est: $_
 
 ### Phase 2 — Build the Voron 2.4 R2 300 (0.4 mm, multi-material)
@@ -180,12 +180,13 @@ those parts and sell what's left of the Kobra. Every phase leaves a **working, b
 - **Waypoint B0:** Kobra prints noticeably cleaner (POM-wheel artifacts gone). Nothing else changed. _Est: $ rails + hardware_
 
 ### Phase B1 — Stealthburner toolhead
-- [ ] Build a **Stealthburner** + Clockwork2 extruder; mount on the Kobra X carriage (printed adapter)
+- [x] Build a **Stealthburner** + ~~Clockwork2~~ Galileo 2 extruder; mount on the Kobra X carriage (printed adapter) — plus Cartographer probe and FilaMatrix cutter
 - [ ] CAN toolhead board (brings wiring sanity; also a future Voron part) — SKR Mini E3 likely can't feed SB + BoxTurtle, so this is where electronics start migrating
 - **Waypoint B1:** Kobra runs the Voron toolhead. _Est: $ SB parts + toolhead board_
 
 ### Phase B2 — BoxTurtle multi-material
-- [ ] Assemble + wire **BoxTurtle** (AFC) alongside the Kobra
+- [x] Assemble + wire **BoxTurtle** (AFC) alongside the Kobra — USB isolator, case mounted, TurtleNeck buffer, respoolers, twin toolhead sensors
+- [ ] Tune the tool change: poop sticking, kick, cutter on brittle filament, ~110–150 s per change (tracked on the project board)
 - **Waypoint B2:** Kobra is now **multi-material** (limited area). _Est: $ BoxTurtle_
 
 ### Phase B3 — Voron bed + build plate

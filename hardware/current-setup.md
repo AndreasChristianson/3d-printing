@@ -5,6 +5,8 @@ Details of the existing printer(s) and toolchain. Seeded from the repo + prior n
 
 ## Printer: Anycubic Kobra Max (modded)
 
+> ⚠️ **Stale (2026-10):** the toolhead is now a Stealthburner + Galileo 2 with a Cartographer probe, FilaMatrix cutter, and BoxTurtle (AFC). The Micro Swiss / BLTouch / SFS rows below predate that; `printer/kobra-max/printer.cfg` is authoritative.
+
 | Area | Detail | Notes |
 |------|--------|-------|
 | Frame / base | Anycubic Kobra Max | Cartesian bedslinger, stock frame, modded |
@@ -98,7 +100,7 @@ air escaping). Filament is kept dry through the whole path:
 
 ## Maintenance / to-do (surfaced from config + diagnostics)
 - [ ] **Kobra:** re-adhere or replace peeling PEI magnetic base sticker
-- [ ] **Kobra:** secure the PTFE tube couplings between dry box / EIBOS dryer and extruder
+- [x] **Kobra:** secure the PTFE tube couplings between dry box / EIBOS dryer and extruder (printed coupler)
 - [ ] **Kobra:** reconcile Orca machine-profile accel (2000) with firmware `max_accel` (1000)
 - [ ] **Kobra:** host Klipper build is `-dirty` — note/track local changes so they're not lost on update
 - [ ] **Ender:** OctoPrint 6 releases behind (1.11.2 → 1.11.8) — update
