@@ -1,16 +1,53 @@
 diff --git a/extras/AFC.py b/extras/AFC.py
-index 9553d15..9d37f9d 100644
+index 9553d15..3744b50 100644
 --- a/extras/AFC.py
 +++ b/extras/AFC.py
-@@ -212,6 +212,7 @@ class afc:
+@@ -212,6 +212,8 @@ class afc:
          self.kick_cmd               = config.get('kick_cmd', None)                  # Macro to use when kicking. Change macro name if you would like to use your own kick macro
          self.wipe                   = config.getboolean("wipe", False)              # Set to True to enable nozzle wiping after lane loads
          self.wipe_cmd               = config.get('wipe_cmd', None)                  # Macro to use when nozzle wiping. Change macro name if you would like to use your own wipe macro
 +        self.wipe_after_poop        = config.getboolean("wipe_after_poop", True)    # LOCAL PATCH: False skips the wipe between poop and kick (the post-kick wipe still runs)
++        self.restore_xy_after_toolchange = config.getboolean("restore_xy_after_toolchange", True)  # LOCAL PATCH: False stays at the post-wipe XY (lifted) after a tool change; the slicer's travel + Z move place the nozzle
          self.poop                   = config.getboolean("poop", False)              # Set to True to enable pooping(purging color) after lane loads
          self.poop_cmd               = config.get('poop_cmd', None)                  # Macro to use when pooping. Change macro name if you would like to use your own poop/purge macro
          self.enable_standalone_purge: bool = config.getboolean("enable_standalone_purge", True)
-@@ -1403,7 +1404,7 @@ class afc:
+@@ -1159,7 +1161,7 @@ class afc:
+                 f"in toolchange: {self.in_toolchange}, POS: "
+             )
+ 
+-    def restore_pos(self, move_z_first=True):
++    def restore_pos(self, move_z_first=True, restore_xy=True):
+         """
+         restore_pos function restores the previous saved position, speed and coord type. The resume uses
+         the z_hop value to lift, move to previous x,y coords, then lower to saved z position.
+@@ -1187,9 +1189,12 @@ class afc:
+             newpos[2] = self.move_z_pos(self.last_gcode_position[2] + self.z_hop, "restore_pos")
+ 
+         # Move to previous x,y location
+-        newpos[:2] = self.last_gcode_position[:2]
+-        self.gcode_move.move_with_transform(newpos, self._get_resume_speed() )
+-        self.function.log_toolhead_pos("Resume prev xy: ")
++        if restore_xy:
++            newpos[:2] = self.last_gcode_position[:2]
++            self.gcode_move.move_with_transform(newpos, self._get_resume_speed() )
++            self.function.log_toolhead_pos("Resume prev xy: ")
++        else:
++            self.function.log_toolhead_pos("Resume prev xy skipped (restore_xy_after_toolchange: False): ")
+ 
+         # Update GCODE STATE variables
+         self.gcode_move.base_position       = list(self.base_position)
+@@ -1205,7 +1210,9 @@ class afc:
+         # Restore the relative E position
+         e_diff = self.gcode_move.last_position[3] - self.last_gcode_position[3]
+         self.gcode_move.base_position[3] += e_diff
+-        self.gcode_move.last_position[:3] = self.last_gcode_position[:3]
++        if restore_xy:
++            self.gcode_move.last_position[:3] = self.last_gcode_position[:3]
++        # LOCAL PATCH: else keep the current XY and lifted Z; the slicer's next travel and Z move place the nozzle
+ 
+         # Return to previous xyz
+         self.gcode_move.move_with_transform(self.gcode_move.last_position,
+@@ -1403,7 +1410,7 @@ class afc:
              self.afcDeltaTime.log_with_time("TOOL_LOAD: After poop")
              self.function.log_toolhead_pos()
  
@@ -19,6 +56,15 @@ index 9553d15..9d37f9d 100644
                  self.gcode.run_script_from_command("{} EXTRUDER={}".format(self.wipe_cmd, cur_extruder.name))
                  self.afcDeltaTime.log_with_time("TOOL_LOAD: After first wipe")
                  self.function.log_toolhead_pos()
+@@ -2486,7 +2493,7 @@ class afc:
+                 # Load the new lane and restore the toolhead position if successful.
+                 if self.TOOL_LOAD(cur_lane, purge_length, set_start_time=False) and not self.error_state:
+                     if restore_pos:
+-                        self.restore_pos()
++                        self.restore_pos(restore_xy=self.restore_xy_after_toolchange)
+                     total_time = self.afcDeltaTime.log_total_time("Total change time:")
+                     self.afc_stats.average_toolchange_time.average_time(total_time)
+                     self.in_toolchange = False
 diff --git a/extras/AFC_HTLF.py b/extras/AFC_HTLF.py
 index 16f83d4..3985abb 100644
 --- a/extras/AFC_HTLF.py
