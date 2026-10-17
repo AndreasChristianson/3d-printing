@@ -1,5 +1,5 @@
 {
-	"change_filament_gcode": "{if flush_length > 0}\nG1 E-3 F2100 ; retract before AFC's z-hop (Orca doesn't emit its toolchange retract here)\n{endif}\nT[next_extruder]; PURGE_LENGTH=[flush_length]\n{if flush_length > 0}\nM83\nG1 E13 F1800 ; refill: AFC_POOP purge_retract 16 minus Orca's 2 mm unretract, minus 1 to stop oozing on the travel from the brush\n{endif}\n; FLUSH_START\n; EXTERNAL_PURGE {flush_length}\n; FLUSH_END",
+	"change_filament_gcode": "T[next_extruder]; PURGE_LENGTH=[flush_length]\n{if flush_length > 0}\nM83\nG1 E-5 F2100 ; cancel Orca's 5 mm toolchange unretract: that retract was before the cut, and AFC_KICK_REFILL already primed (stays retracted for the travel)\n{endif}\n; FLUSH_START\n; EXTERNAL_PURGE {flush_length}\n; FLUSH_END",
 	"extra_loading_move": "0",
 	"from": "User",
 	"inherits": "MyKlipper 0.4 nozzle",
@@ -50,6 +50,9 @@
 		"Direct Drive Standard"
 	],
 	"printer_settings_id": "kobra-max-klipper",
+	"retract_length_toolchange": [
+		"5"
+	],
 	"retract_restart_extra_toolchange": [
 		"0"
 	],
