@@ -1,0 +1,17 @@
+text,category,bundle_d,qty,note
+E MOTOR,motor,4.5,6,toolhead: Z chain base / X chain / toolhead connectors x2 sides
+HEATER,power,3.0,6,toolhead
+THERM,sensor,2.5,6,toolhead
+PROBE,sensor,4.0,2,Cartographer USB (continuous cable)
+BLTOUCH,sensor,3.0,6,toolhead (old wires)
+PRE SENSOR,sensor,2.5,6,toolhead: Filamatrix pre-gears sensor (PC2)
+POST SENSOR,sensor,2.5,6,toolhead: Filamatrix post-gears sensor (PA15)
+PART FAN,fan,2.5,6,toolhead
+HE FAN,fan,2.5,6,toolhead (heatbreak fan)
+LEDS,led,3.0,6,toolhead (Stealthburner neopixels)
+X MOTOR,motor,4.5,4,Z chain base + Z chain top
+X STOP,sensor,2.5,4,Z chain base + Z chain top
+RUNOUT,sensor,3.0,4,old wires to the X gantry; Z chain base + top
+ADVANCE,sensor,2.5,2,TurtleNeck advance switch
+TRAILING,sensor,2.5,2,TurtleNeck trailing switch
+BT 24V,power,4.5,2,BoxTurtle 24V feed
