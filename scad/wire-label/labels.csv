@@ -4,8 +4,8 @@ HEATER,power,3.0,6,toolhead
 THERM,sensor,2.5,6,toolhead
 PROBE,sensor,4.0,2,Cartographer USB (continuous cable)
 BLTOUCH,sensor,3.0,6,toolhead (old wires)
-PRE SENSOR,sensor,2.5,6,toolhead: Filamatrix pre-gears sensor (PC2)
-POST SENSOR,sensor,2.5,6,toolhead: Filamatrix post-gears sensor (PA15)
+PRE,sensor,2.5,6,toolhead: Filamatrix pre-gears sensor (PC2)
+POST,sensor,2.5,6,toolhead: Filamatrix post-gears sensor (PA15)
 PART FAN,fan,2.5,6,toolhead
 HE FAN,fan,2.5,6,toolhead (heatbreak fan)
 LEDS,led,3.0,6,toolhead (Stealthburner neopixels)
