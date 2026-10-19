@@ -13,7 +13,12 @@
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ORCA_USER_DIR="${ORCA_USER_DIR:-$HOME/Library/Application Support/OrcaSlicer/user/default}"
+if [[ "$(uname -s)" == "Darwin" ]]; then
+  DEFAULT_ORCA_USER_DIR="$HOME/Library/Application Support/OrcaSlicer/user/default"
+else
+  DEFAULT_ORCA_USER_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/OrcaSlicer/user/default"
+fi
+ORCA_USER_DIR="${ORCA_USER_DIR:-$DEFAULT_ORCA_USER_DIR}"
 
 QUIET=0
 [[ "${1:-}" == "--quiet" ]] && QUIET=1
@@ -43,7 +48,9 @@ for kind in machine filament process; do
     # Machine profiles can carry a print-host API key (OctoPrint/Klipper). Keep the
     # real value in OrcaSlicer's user dir only; the tracked copy gets REDACTED.
     if grep -q '"printhost_apikey"' "$dst_dir/$name"; then
-      sed -i '' -E 's/("printhost_apikey"[[:space:]]*:[[:space:]]*)"[^"]*"/\1"REDACTED"/' "$dst_dir/$name"
+      # -i.bak works with both BSD (macOS) and GNU sed.
+      sed -i.bak -E 's/("printhost_apikey"[[:space:]]*:[[:space:]]*)"[^"]*"/\1"REDACTED"/' "$dst_dir/$name"
+      rm -f "$dst_dir/$name.bak"
       echo "copied: $kind/$name (printhost_apikey redacted)"
     else
       echo "copied: $kind/$name"
