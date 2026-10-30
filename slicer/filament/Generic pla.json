@@ -12,10 +12,10 @@
 		"Direct Drive Standard"
 	],
 	"filament_flow_ratio": [
-		"0.93"
+		"1"
 	],
 	"filament_max_volumetric_speed": [
-		"200"
+		"14"
 	],
 	"filament_settings_id": [
 		"Generic pla"
@@ -39,7 +39,7 @@
 		"200"
 	],
 	"pressure_advance": [
-		"0.0514"
+		"0"
 	],
 	"slow_down_layer_time": [
 		"0"
