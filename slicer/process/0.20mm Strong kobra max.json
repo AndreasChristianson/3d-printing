@@ -2,7 +2,7 @@
 	"accel_to_decel_enable": "0",
 	"alternate_extra_wall": "1",
 	"brim_object_gap": "0.07",
-	"brim_type": "outer_only",
+	"brim_type": "no_brim",
 	"default_acceleration": "500",
 	"enable_prime_tower": "0",
 	"ensure_vertical_shell_thickness": "ensure_moderate",
