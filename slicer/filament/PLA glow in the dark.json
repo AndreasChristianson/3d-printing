@@ -30,7 +30,7 @@
 		"Phosphor-filled PLA: strings more than plain PLA and is abrasive (hardened nozzle; wears the cutter blade faster). Based on Generic matte pla: 7 C cooler, longer/faster retract, more fan. PA not tuned yet."
 	],
 	"filament_retraction_length": [
-		"1.0"
+		"1"
 	],
 	"filament_retraction_speed": [
 		"40"
@@ -54,10 +54,10 @@
 	"inherits": "Generic PLA @System",
 	"name": "PLA glow in the dark",
 	"nozzle_temperature": [
-		"205"
+		"202"
 	],
 	"nozzle_temperature_initial_layer": [
-		"210"
+		"207"
 	],
 	"overhang_fan_speed": [
 		"70"
