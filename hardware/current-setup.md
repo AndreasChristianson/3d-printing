@@ -99,9 +99,9 @@ air escaping). Filament is kept dry through the whole path:
 - [x] Ender 3 host — Raspberry Pi 4B (4 GB), OctoPrint 1.11.2; confirm hostname/URL
 
 ## Maintenance / to-do (surfaced from config + diagnostics)
-- [ ] **Kobra:** re-adhere or replace peeling PEI magnetic base sticker
+Tracked as GitHub issues on the 3D Printing Build Board.
+- [ ] **Kobra:** re-adhere or replace peeling PEI magnetic base sticker (#21)
 - [x] **Kobra:** secure the PTFE tube couplings between dry box / EIBOS dryer and extruder (printed coupler)
-- [ ] **Kobra:** reconcile Orca machine-profile accel (2000) with firmware `max_accel` (1000)
-- [ ] **Kobra:** host Klipper build is `-dirty` — note/track local changes so they're not lost on update
-- [ ] **Ender:** OctoPrint 6 releases behind (1.11.2 → 1.11.8) — update
-- [ ] **Ender:** SD/storage 89.8% full — clean up uploads/timelapses
+- [ ] **Kobra:** reconcile Orca machine-profile accel (2000) with firmware `max_accel` (1000) — folded into input shaping (#14)
+- [ ] **Kobra:** host Klipper build is `-dirty` — note/track local changes so they're not lost on update (#23)
+- ~~**Ender:** OctoPrint update, storage cleanup~~ — Ender given away (2026-10)

@@ -140,9 +140,9 @@ auto-cal of all, but they're appliances, not builds — see Route D.)
 Keep both current printers healthy; small maintenance spend.
 - [x] Y idlers/tensioners replaced (done)
 - [ ] X idler swap (part on order)
-- [ ] Re-adhere/replace Kobra PEI magnetic base
+- [ ] Re-adhere/replace Kobra PEI magnetic base (#21)
 - [x] Secure PTFE couplings (dry box / EIBOS → extruder) — printed coupler
-- [ ] OctoPrint update + storage cleanup (Ender)
+- ~~OctoPrint update + storage cleanup (Ender)~~ — Ender given away
 - **Waypoint 0:** both printers reliable, single-material, as-is. _Est: $_
 
 ### Phase 1 — Kobra → large-format / large-nozzle workhorse

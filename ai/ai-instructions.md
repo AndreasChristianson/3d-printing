@@ -14,7 +14,7 @@ repo. Prefer non-interactive SSH: `ssh -o BatchMode=yes <host> '<cmd>'`.
 | Printer | Host software | Host | Web UI | Remote config dir | Repo dir |
 |---------|---------------|------|--------|-------------------|----------|
 | Kobra Max (modded) | Klipper | `klipper2` | `http://klipper2/` (Mainsail) | `~/printer_data/config` | `printer/kobra-max/` |
-| Ender 3 v3 SE | OctoPrint | `octopi3` | `http://octopi3/` | `~/.octoprint` | `printer/ender-3-v3-se/` |
+| Ender 3 v3 SE (given away 2026-10; configs kept for reference) | OctoPrint | — | — | — | `printer/ender-3-v3-se/` |
 | Voron 2.4 (300) | Klipper (planned) | — not built yet — | — | — | — |
 
 The Kobra Max runs a Stealthburner toolhead with a Galileo 2 extruder (see
