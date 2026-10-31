@@ -11,9 +11,6 @@
 	"filament_extruder_variant": [
 		"Direct Drive Standard"
 	],
-	"filament_flow_ratio": [
-		"1"
-	],
 	"filament_max_volumetric_speed": [
 		"14"
 	],
@@ -24,24 +21,9 @@
 		"99.56%"
 	],
 	"from": "User",
-	"hot_plate_temp": [
-		"50"
-	],
-	"hot_plate_temp_initial_layer": [
-		"50"
-	],
 	"inherits": "Generic PLA @System",
 	"name": "Generic pla",
-	"nozzle_temperature": [
-		"195"
-	],
-	"nozzle_temperature_initial_layer": [
-		"200"
-	],
 	"pressure_advance": [
-		"0"
-	],
-	"slow_down_layer_time": [
 		"0"
 	],
 	"version": "2.3.2.60"
