@@ -11,6 +11,9 @@
 	"filament_extruder_variant": [
 		"Direct Drive Standard"
 	],
+	"filament_flow_ratio": [
+		"0.9408"
+	],
 	"filament_max_volumetric_speed": [
 		"20"
 	],
