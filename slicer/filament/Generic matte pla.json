@@ -17,9 +17,6 @@
 	"filament_extruder_variant": [
 		"Direct Drive Standard"
 	],
-	"filament_flow_ratio": [
-		"0.94"
-	],
 	"filament_max_volumetric_speed": [
 		"200"
 	],
@@ -39,22 +36,13 @@
 		"0.4"
 	],
 	"from": "User",
-	"hot_plate_temp": [
-		"48"
-	],
-	"hot_plate_temp_initial_layer": [
-		"50"
-	],
 	"inherits": "Generic PLA @System",
 	"name": "Generic matte pla",
-	"nozzle_temperature": [
-		"217"
-	],
 	"overhang_fan_speed": [
 		"70"
 	],
 	"pressure_advance": [
-		"0.03"
+		"0"
 	],
 	"slow_down_layer_time": [
 		"0"
