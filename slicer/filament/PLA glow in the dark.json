@@ -48,10 +48,7 @@
 		"70"
 	],
 	"pressure_advance": [
-		"0"
-	],
-	"slow_down_layer_time": [
-		"0"
+		"0.021"
 	],
 	"temperature_vitrification": [
 		"40"
