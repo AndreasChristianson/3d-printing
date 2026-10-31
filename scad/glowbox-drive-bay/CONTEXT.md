@@ -112,7 +112,7 @@ through the two side bays.
   `P_20261028_0152*`.
 - **Grille size:** body 147.9 W × 41.7 H. Across the clip tabs it's 151.1, so each
   tab sticks out ~1.6.
-- **Tab positions** (`P_20261028_015937`, `_020013`): tabs are 4.5 mm wide with a
+- **Tab positions** (`P_20261028_015937`, `_020013`): stock tabs are 4.5 mm wide with a
   17.3 mm gap between the two on each end, so each sits ~7.7 mm in from the top/bottom.
 - **Whole 3-bay opening:** 147.8 × 128.9.
 - **Chosen: option 2, solid replacement blanks.** The design is in `bay_blank.scad`
@@ -122,6 +122,11 @@ through the two side bays.
     middle of the end.
   - The tabs stick out 0.9 mm instead of 1.6, with 45° on both sides so a firm pull
     releases them. Strain at full flex is ~2.6%.
+  - **Test fit 2026-10-29:** the tabs were too big for the case holes. Y (height)
+    cut from 4.5 to 3.5 and the Z flat from 1 to 0.5 (tab length 2.8 → 2.3);
+    the tab centres stay on the stock positions.
+  - Each arm root now has a 4 mm 45° gusset in the inside corner (end wall to face),
+    only over the 6 mm root, so the arms' free length and flex are unchanged.
   - The depths are GUESSED (face 2, rim 8, tab 3 behind the face); measure them.
 - **The bottom stock grille is screwed in;** blank #3 may need a screw hole.
 - **Each stock grille has small risers on the back;** their purpose is unclear.
