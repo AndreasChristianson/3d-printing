@@ -23,12 +23,14 @@
 //   rail_bottom  one per drive, print orientation
 //   filler       blanking plug for the 3 middle 5.25" bays
 //
-// Render:   openscad -o carrier.stl -D 'part="carrier"' drive_bay.scad
+// Render:   scad/render.sh scad/glowbox-drive-bay/drive_bay.scad carrier.stl -D 'part="carrier"'
+//           (from the repo root; fills in the provenance tags)
 // Preview:  openscad -o assembly.png --render --imgsize=1200,900 \
 //             --colorscheme=Tomorrow --camera=0,75,75,55,0,325,560 drive_bay.scad
 
 hdd_lib_only = true;
 include <hdd35.scad>
+include <../lib/provenance.scad>
 
 part = "assembly";
 $fn = 40;
@@ -109,6 +111,12 @@ det_bump = 0.8;     // how far the bump stands proud of the rail edge
 
 slice_d = 45;       // reaches past the front mount row
 
+// Provenance tags: raised on the carrier's top face between the boss rows,
+// engraved (inset) in each rail's outer face beside the screw holes so it
+// can't catch in the groove.
+car_tag_size  = 3.5;
+rail_tag_size = 3;
+
 // 5.25" filler plug. GUESSED from the 3-bay standard; MEASURE the opening.
 plug_w = 146.0;
 plug_h = 127.0;
@@ -155,7 +163,9 @@ function mount_x(c) = car_w / 2 - mount_wall_to_hole - c * mount_pitch;
    Z=rail_t the face against the drive. s flips the hole/detent side; both
    installed rails use s = +1 (holes toward the drive base). The top rail is
    that rail mirrored in Z, so the two printed rails are mirror images. */
-module rail(s = 1) {
+// mirrored: the part is printed mirrored in Z (the top rail), so the tag
+// mustn't be mirrored again to read right.
+module rail(s = 1, mirrored = false) {
     difference() {
         union() {
             // body, chamfered at the leading end so it finds the groove
@@ -176,6 +186,11 @@ module rail(s = 1) {
         // slot that frees the detent beam
         translate([s * (rail_w / 2 - det_beam - det_slot / 2), det_y, rail_t / 2])
             cube([det_slot, det_len, rail_t + 2], center = true);
+        // provenance tag, inset in the outer face on the side away from the
+        // holes and detent; it runs along the rail and reads from outside
+        translate([s * (hole_x - cbore_d / 2 - rail_w / 2) / 2, hdd_l / 2, -0.01])
+            mirror([mirrored ? 0 : 1, 0, 0]) rotate([0, 0, 90])
+                provenance(size = rail_tag_size, depth = prov_depth + 0.01);
     }
     // detent bump on the beam's outer edge
     translate([s * (rail_w / 2 + det_bump - det_r), det_y, 0])
@@ -208,6 +223,10 @@ module carrier() {
         union() {
             translate([-car_w / 2, 0, 0]) cube([car_w, car_d, zt]);
             top_zone();
+            // provenance tag on top of the groove plate, between the boss
+            // rows (clear of the rear bosses' 45 deg ramps)
+            translate([0, (mount_y0 + boss_r + mount_y0 + mount_row - boss_r - top_h) / 2, zt - 0.01])
+                provenance(size = car_tag_size);
         }
         // the drive space between the plates, open front and back
         translate([-car_w / 2 + wall_t, -1, plate_t]) cube([car_w - 2 * wall_t, car_d + 2, inner_h]);
@@ -238,7 +257,7 @@ module carrier() {
 module rails_installed(x, y_out = 0) {
     translate([x, pocket_d + y_out, plate_t - groove_d]) rail(1);
     // the top rail is screwed to the drive, so it rides with it (gap above)
-    translate([x, pocket_d + y_out, plate_t + hdd_w + rail_t]) mirror([0, 0, 1]) rail(1);
+    translate([x, pocket_d + y_out, plate_t + hdd_w + rail_t]) mirror([0, 0, 1]) rail(1, true);
 }
 
 module drive_installed(x, y_out = 0) {
@@ -281,7 +300,7 @@ if (part == "assembly") {
             translate([-car_w, 0, -1]) cube([2 * car_w, slice_d, car_h + 2]);
         }
 } else if (part == "rail_top") {
-    translate([0, 0, rail_t]) mirror([0, 0, 1]) rail(1);
+    translate([0, 0, rail_t]) mirror([0, 0, 1]) rail(1, true);
 } else if (part == "rail_bottom") {
     translate([0, 0, rail_t]) rotate([0, 180, 0]) rail(1);
 } else if (part == "filler") {

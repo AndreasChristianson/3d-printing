@@ -193,6 +193,10 @@ through the two side bays.
     way in.
 - **STLs are in print orientation:** carrier and slice front face down, rails
   drive face down.
+- **Provenance tags (2026-10-31):** raised on the carrier's top face between the boss
+  rows (it shows on the slice only if the slice is made deeper); inset 0.4 mm in each
+  rail's outer face, beside the screw holes. Render every part with
+  `scad/render.sh scad/glowbox-drive-bay/drive_bay.scad <out>.stl -D 'part="..."'`.
 
 ### Case fit
 - **Mounting (measured 2026-10-28, `P_20261028_005920` and `_005954`):** each of the
