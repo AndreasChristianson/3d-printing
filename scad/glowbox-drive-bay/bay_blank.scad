@@ -17,7 +17,10 @@
 // front face, +Z runs into the case. Prints face down as modelled; the arms
 // are walls standing on the bed, so they flex in the print plane.
 //
-// Render:  openscad -o bay_blank.stl bay_blank.scad
+// Render:  scad/render.sh scad/glowbox-drive-bay/bay_blank.scad
+// (fills in the provenance tag on the back of the face)
+
+include <../lib/provenance.scad>
 
 $fn = 32;
 
@@ -90,6 +93,8 @@ module bay_blank() {
             // tabs
             for (sx = [-1, 1], y = tab_y)
                 translate([sx * blank_w / 2, y, 0]) mirror([sx < 0 ? 1 : 0, 0, 0]) tab();
+            // provenance tag on the back of the face, reads from behind
+            translate([0, 0, face_t - 0.01]) provenance(size = 3.5);
         }
         for (sx = [-1, 1], sy = [-1, 1]) {
             // slit along the inside of each arm, through the face, from the

@@ -40,3 +40,16 @@ Printer configs can contain credentials. When importing:
 - **Never pull** runtime/data dirs (uploads, logs, gcodes, timelapse, `.git`, dated
   `printer-*.cfg` auto-save backups).
 - After importing, scan the `printer/` tree for unredacted secrets before committing.
+
+## SCAD parts: provenance tags
+
+Functional parts that have room for it carry an embossed provenance tag: the repo, the
+`.scad`'s path in the repo, and the git SHA + commit date it was rendered from. That
+way a part found years later can be traced back to its pattern.
+
+- `include <../lib/provenance.scad>` and place `provenance()` on a flat face that isn't
+  cosmetic (inside or back), as a raised tag on a surface that prints facing up.
+- Render with `scad/render.sh path/to/part.scad [out.stl]`, which fills in the path,
+  SHA and date. **Commit before rendering** for print: uncommitted changes get a
+  `-dirty` SHA, and a plain `openscad -o` render shows the placeholder `nosha`.
+- Skip it on small parts and on decorative or cosmetic ones.

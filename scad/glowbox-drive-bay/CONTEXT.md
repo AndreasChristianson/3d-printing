@@ -127,6 +127,9 @@ through the two side bays.
     the tab centres stay on the stock positions.
   - Each arm root now has a 4 mm 45° gusset in the inside corner (end wall to face),
     only over the 6 mm root, so the arms' free length and flex are unchanged.
+  - **Final (2026-10-31):** the reprinted blank fits. It now carries an embossed
+    provenance tag (repo, path, SHA, date) on the back of the face; render it with
+    `scad/render.sh scad/glowbox-drive-bay/bay_blank.scad`. Print 3.
   - The depths are GUESSED (face 2, rim 8, tab 3 behind the face); measure them.
 - **The bottom stock grille is screwed in;** blank #3 may need a screw hole.
 - **Each stock grille has small risers on the back;** their purpose is unclear.
