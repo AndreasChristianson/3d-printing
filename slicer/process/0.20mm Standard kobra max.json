@@ -5,6 +5,7 @@
 	"brim_type": "no_brim",
 	"combine_brims": "1",
 	"default_acceleration": "1000",
+	"elefant_foot_compensation": "0.1",
 	"enable_prime_tower": "0",
 	"filename_format": "{input_filename_base}_{filament_type[initial_tool]}_{printer_model}_{scale[0]}.gcode",
 	"from": "User",
@@ -27,12 +28,11 @@
 		"Direct Drive Standard"
 	],
 	"print_settings_id": "0.20mm Standard kobra max",
+	"reduce_crossing_wall": "1",
 	"single_loop_draft_shield": "1",
 	"skirt_distance": "4",
 	"skirt_height": "2",
 	"skirt_loops": "3",
-	"sparse_infill_density": "15%",
-	"sparse_infill_pattern": "crosshatch",
 	"sparse_infill_speed": "70",
 	"support_interface_speed": "60",
 	"support_on_build_plate_only": "1",
@@ -44,6 +44,5 @@
 	"top_surface_speed": "40",
 	"travel_acceleration": "1000",
 	"travel_speed": "120",
-	"version": "2.3.2.60",
-	"wall_loops": "3"
+	"version": "2.3.2.60"
 }
