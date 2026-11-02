@@ -197,12 +197,14 @@ through the two side bays.
   floor_t (4 mm) deep in the outer face of both plates. Under a groove it goes
   through the floor, and under a rib it is a blind pocket, so the groove walls that
   the detent bumps ride on stay whole. Every hole has a pointed roof along Y (up
-  when printed front-down). Solid keep-outs: the detent notches, the tab pockets, and
-  the plate under the bosses. `mesh_style`: "tri" (default) is a triangle truss
+  when printed front-down). Solid keep-outs: the tab pockets and the plate under the
+  bosses (the detent notches are in the groove walls above the mesh layer, so they
+  need none). Where a keep-out cuts a triangle cell, the solid spreads down at 45°
+  to that cell's struts, so it never starts printing in mid-air. `mesh_style`: "tri" (default) is a triangle truss
   (struts along Y plus ±45° diagonals, 45° roofs, stiff because the struts stretch
   instead of bend); "hex" is the 8 mm honeycomb (whole cells only). `-D mesh=false`
-  gives the solid carrier. Solid volume: none 359, hex 270 (2 mm web), tri 241 cm³
-  (3 mm struts; 2 mm would be 220).
+  gives the solid carrier. Solid volume: none 359, hex 270 (2 mm web), tri 238 cm³
+  (3 mm struts).
 - **Provenance tags (2026-10-31):** on the carrier, raised on the back face of the
   front skirt (moved there 2026-11-02 to make room for the top-plate mesh; it is in
   the slice too); inset 0.4 mm in each

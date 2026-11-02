@@ -131,8 +131,8 @@ slice_d = 60;       // reaches past the measured front mount row (52.4)
 // through the groove floor, under a rib it is a blind pocket, so the groove
 // walls (the detent bumps ride along them) stay whole. The carrier prints
 // front face down, so +Y is up on the printer: every hole has a pointed
-// roof along Y (no flat ceiling). Solid: the detent notches, the tab pockets
-// at both ends, and the top plate under each boss.
+// roof along Y (no flat ceiling). Solid: the tab pockets at both ends and
+// the top plate under each boss.
 // "hex": honeycomb, whole cells only (60 deg roofs).
 // "tri": triangle truss, see tri_panel (45 deg roofs).
 mesh        = true;
@@ -278,8 +278,10 @@ module hex_holes(r, h, keep = [])
 // struts stretch instead of bending), so it stays stiff with big cells.
 // Cells may be cut by the panel's sides (a wall along v) and bottom (a
 // floor), but not its top: a cell whose tip would reach past the top edge
-// is dropped, since the cut would be a flat roof. Keep-outs get a 45 deg
-// point underneath for the same reason.
+// is dropped, since the cut would be a flat roof. In a cell a keep-out
+// cuts, the solid spreads down from the keep-out at 45 deg to the cell's
+// own struts (a tent), so it grows from something below it and the hole
+// left on each side has a 45 deg roof.
 module tri_panel(r, keep = []) {
     a  = mesh_tri_a;
     d  = mesh_web / 2;
@@ -290,24 +292,31 @@ module tri_panel(r, keep = []) {
     nu = ceil((r[2] - r[0]) / (2 * a)) + 1;
     nv = ceil((r[3] - r[1]) / a) + 1;
     // remove slivers under 1 mm; delta offsets keep the corners sharp
-    offset(delta = 0.5) offset(delta = -0.5) difference() {
-        intersection() {
-            translate([r[0], r[1]]) square([r[2] - r[0], r[3] - r[1]]);
-            // each diamond (centre where j + l is odd) splits into two
-            // triangles along its vertical diagonal
-            for (j = [-nu : nu], l = [-nv : 1], s = [-1, 1])
-                let(cu = uc + j * a, cv = vc + l * a)
-                if ((j + l) % 2 != 0 && cv + a - tip <= r[3])
-                    offset(delta = -d)
-                        polygon([[cu + s * a, cv], [cu, cv + a], [cu, cv - a]]);
-        }
-        for (k = keep) let(w = k[2] - k[0] + 2 * mesh_web)
-            hull() {
-                translate([k[0] - mesh_web, k[1] - mesh_web])
-                    square([w, k[3] - k[1] + 2 * mesh_web]);
-                translate([(k[0] + k[2]) / 2, k[1] - mesh_web - w / 2]) square(0.01, center = true);
-            }
-    }
+    // keep-outs grown by a web
+    kw = [for (k = keep) [k[0] - mesh_web, k[1] - mesh_web, k[2] + mesh_web, k[3] + mesh_web]];
+    offset(delta = 0.5) offset(delta = -0.5)
+        // each diamond (centre where j + l is odd) splits into two
+        // triangles along its vertical diagonal
+        for (j = [-nu : nu], l = [-nv : 1], s = [-1, 1])
+            let(cu = uc + j * a, cv = vc + l * a,
+                u0 = min(cu, cu + s * a), u1 = max(cu, cu + s * a),
+                hits = [for (k = kw) if (k[0] < u1 && k[2] > u0 && k[1] < cv + a && k[3] > cv - a) k])
+            if ((j + l) % 2 != 0 && cv + a - tip <= r[3])
+                difference() {
+                    intersection() {
+                        translate([r[0], r[1]]) square([r[2] - r[0], r[3] - r[1]]);
+                        offset(delta = -d)
+                            polygon([[cu + s * a, cv], [cu, cv + a], [cu, cv - a]]);
+                    }
+                    // the tent reaches 2a down, past the bottom of any cell
+                    for (k = hits) {
+                        translate([k[0], k[1]]) square([k[2] - k[0], k[3] - k[1]]);
+                        hull() {
+                            translate([k[0], k[1]]) square([k[2] - k[0], 0.01]);
+                            translate([k[0] - 2 * a, k[1] - 2 * a]) square([k[2] - k[0] + 4 * a, 0.01]);
+                        }
+                    }
+                }
 }
 
 // Holes h tall (from Z=0) on a panel [u0, v0, u1, v1] in the XY plane,
@@ -321,14 +330,12 @@ boss_keep = [for (yh = mount_y, x = mount_x)
              [x - boss_r, yh - boss_r - top_h, x + boss_r, yh + boss_r]];
 
 module carrier_mesh() {
-    nr = det_r + 0.3;
-    notch_keep = [for (x = drive_x, sx = [-1, 1], y = [pocket_d + det_y, pocket_d + det_y_rear])
-                  let(cx = x + sx * (rail_w / 2 + det_bump - det_r))
-                  [cx - nr, y - nr, cx + nr, y + nr]];
+    // the detent notches are cut in the groove walls, above this layer, so
+    // they need no keep-out
     r = [-car_w / 2 + wall_t + mesh_margin, pocket_d + mesh_margin,
          car_w / 2 - wall_t - mesh_margin, car_d - pocket_d - mesh_margin];
-    translate([0, 0, -1]) mesh_holes(r, 1 + floor_t, notch_keep);
-    translate([0, 0, zt - floor_t]) mesh_holes(r, floor_t + 1, concat(notch_keep, boss_keep));
+    translate([0, 0, -1]) mesh_holes(r, 1 + floor_t);
+    translate([0, 0, zt - floor_t]) mesh_holes(r, floor_t + 1, boss_keep);
     // side walls, over the drive space: panel u = Z, v = Y
     for (s = [-1, 1])
         translate([s * (car_w / 2 - wall_t / 2) - (wall_t + 2) / 2, 0, 0])
