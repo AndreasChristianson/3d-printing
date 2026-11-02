@@ -49,6 +49,10 @@ way a part found years later can be traced back to its pattern.
 
 - `include <../lib/provenance.scad>` and place `provenance()` on a flat face that isn't
   cosmetic (inside or back), as a raised tag on a surface that prints facing up.
+- Don't engrave the text straight into a face; small engraved text came out
+  unreadable (glowbox rails, 2026-11). Where the face must stay flush (it slides or
+  mates), cut a shallow pocket and raise the text from its floor, keeping the text top
+  ~0.2 mm below the face (see `rail()` in `scad/glowbox-drive-bay/drive_bay.scad`).
 - Render with `scad/render.sh path/to/part.scad [out.stl]`, which fills in the path,
   SHA and date. **Commit before rendering** for print: uncommitted changes get a
   `-dirty` SHA, and a plain `openscad -o` render shows the placeholder `nosha`.

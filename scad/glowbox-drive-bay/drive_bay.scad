@@ -92,7 +92,7 @@ boss_r    = 5;      // around each M3 heat-set in the top zone
 // v0 had 1.5 here and 1.0 groove clearance; the test print had ~1 mm of play
 // both ways, so this prints about 0.5 tight vertically and true sideways.
 v_clear   = 0.8;    // drive+rails vertical play in the grooves
-height_trim = 2;    // v0 was 1-2 mm too tall for the bay
+height_trim = 1;    // v0 was 1-2 mm too tall for the bay
 
 rail_w    = 31;     // wider than the drive (26.1) so it rides in the groove
 rail_t    = 5;
@@ -126,10 +126,15 @@ det_bump = 1.0;     // how far the bump stands proud of the rail edge
 slice_d = 60;       // reaches past the measured front mount row (52.4)
 
 // Provenance tags: raised on the carrier's top face, along the depth between
-// the boss columns; engraved (inset) in each rail's outer face between the
-// screw holes, so it can't catch in the groove.
+// the boss columns. On each rail it sits in a pocket in the outer face
+// between the screw holes, raised from the pocket floor but below the face,
+// so it can't catch in the groove. (v0's text engraved straight into the
+// face was unreadable.)
 car_tag_size  = 3.5;
 rail_tag_size = 2.8;
+rail_tag_w      = 16;    // pocket, across the rail
+rail_tag_pocket = 1.0;   // pocket depth
+rail_tag_relief = 0.2;   // text top stays this far below the face
 
 // 5.25" filler plug. GUESSED from the 3-bay standard; MEASURE the opening.
 plug_w = 146.0;
@@ -159,6 +164,7 @@ car_d   = pocket_d + hdd_l + 0.5;
 // the front face and merges into the skirt.
 mount_y = [mount_y_back, mount_y_front, car_d - mount_y_front, car_d - mount_y_back];
 mount_x = [for (d = mount_x_edge) car_w / 2 - d];
+rail_tag_l = hdd_side_hole_y[1] - hdd_side_hole_y[0] - cbore_d - 2;
 // rear detent: the bump that lands in the carrier's rear notch
 det_y_rear = car_d - 2 * pocket_d - det_y;
 drive_x = [for (i = [0 : n_drives - 1]) (i - (n_drives - 1) / 2) * pitch];
@@ -204,12 +210,15 @@ module rail() {
         for (s = [-1, 1], y = [det_y, det_y_rear])
             translate([s * (rail_w / 2 - det_beam - det_slot / 2), y, rail_t / 2])
                 cube([det_slot, det_len, rail_t + 2], center = true);
-        // provenance tag, inset in the outer face between the screw holes;
-        // it runs along the rail and reads from outside
-        translate([0, (hdd_side_hole_y[0] + hdd_side_hole_y[1]) / 2, -0.01])
-            mirror([1, 0, 0]) rotate([0, 0, 90])
-                provenance(size = rail_tag_size, depth = prov_depth + 0.01);
+        // pocket for the provenance tag, between the counterbores
+        translate([-rail_tag_w / 2, hdd_side_hole_y[0] + cbore_d / 2 + 1, -1])
+            cube([rail_tag_w, rail_tag_l, 1 + rail_tag_pocket]);
     }
+    // provenance tag, raised from the pocket floor; it runs along the rail
+    // and reads from outside
+    translate([0, (hdd_side_hole_y[0] + hdd_side_hole_y[1]) / 2, rail_tag_relief])
+        mirror([1, 0, 0]) rotate([0, 0, 90])
+            provenance(size = rail_tag_size, depth = rail_tag_pocket - rail_tag_relief + 0.01);
     // detent bumps on the beams' outer edges
     for (s = [-1, 1], y = [det_y, det_y_rear])
         translate([s * (rail_w / 2 + det_bump - det_r), y, 0])

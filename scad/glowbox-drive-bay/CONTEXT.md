@@ -256,7 +256,7 @@ spare drive.
   there are 4 boss rows (the measured pair, plus the same pair seen from the back)
   to keep one carrier for both bays, turned around. The front-most bosses merge into
   the skirt.
-- Carrier 2 mm shorter (`height_trim`).
+- Carrier 1 mm shorter (`height_trim`; first set to 2, the user chose 1).
 - Groove clearance 1.0 → 0.4 total; vertical clearance 1.5 → 0.8 (v0 printed ~0.5
   tight vertically).
 - Rail 30 → 31 wide; 4 detent bumps per rail (both edges, front and rear) to match
@@ -265,6 +265,8 @@ spare drive.
   (`part="rail"`, print 2 per drive).
 - Counterbores 7.5 → 8.6.
 - Slice is 60 deep, so it includes the measured front row.
+- Rail tag: the v0 engraved text was unreadable. It now sits in a 1 mm pocket between the
+  screw holes, raised 0.8 from the pocket floor (top 0.2 below the face).
 
 ## Photos
 

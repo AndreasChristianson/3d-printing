@@ -10,6 +10,8 @@
 // Use: include <../lib/provenance.scad>, then place provenance() on a flat
 // face that isn't cosmetic (inside or back). The tag lies in XY, reads from
 // +Z, and rises prov_depth above Z=0.
+// On a face that must stay flush, cut a pocket and raise the tag from its
+// floor instead of engraving it: engraved small text prints unreadably.
 
 prov_repo  = "github.com/AndreasChristianson/3d-printing";
 scad_path  = "unknown path (render with scad/render.sh)";
