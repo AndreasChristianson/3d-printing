@@ -252,10 +252,12 @@ spare drive.
   `P_20261102_000255`).
 
 **v1 changes (drive_bay.scad)**
-- Bosses at the measured positions. Rows aren't centred in the depth any more, so
-  there are 4 boss rows (the measured pair, plus the same pair seen from the back)
-  to keep one carrier for both bays, turned around. The front-most bosses merge into
-  the skirt.
+- Bosses at the measured positions, 2 rows × 2. A photo of the case top with the
+  top plate off (`P_20261102_002022`) shows both bays' pads at the **same depth**,
+  mirrored left-right. So the carrier no longer turns around: `carrier` is for the
+  test-fitted bay and `carrier_mirror` (bosses mirrored across X) for the other.
+  (A first v1 tried 4 boss rows to stay reversible; dropped.) The hole pattern is
+  only ~1.25 mm off-centre, so the two differ by ~2.5 mm.
 - Carrier 1 mm shorter (`height_trim`; first set to 2, the user chose 1).
 - Groove clearance 1.0 → 0.4 total; vertical clearance 1.5 → 0.8 (v0 printed ~0.5
   tight vertically).
@@ -274,4 +276,5 @@ spare drive.
 - `P_20261025_*`: the old cage out of the case
 - `P_20261027_*`, `P_20261028_0059*`: the case and the caliper measurements
 - `P_20261028_0117*`: the hinged front door
-- `P_20261101_*`, `P_20261102_*`: v0 test fit: hole marks, caliper readings, a screw head
+- `P_20261101_*`, `P_20261102_000255`: v0 test fit: hole marks, caliper readings, a screw head
+- `P_20261102_002022`: the case's top plate from above, both bays' mount pads
