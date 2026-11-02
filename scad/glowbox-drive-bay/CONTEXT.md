@@ -254,10 +254,14 @@ spare drive.
 **v1 changes (drive_bay.scad)**
 - Bosses at the measured positions, 2 rows × 2. A photo of the case top with the
   top plate off (`P_20261102_002022`) shows both bays' pads at the **same depth**,
-  mirrored left-right. So the carrier no longer turns around: `carrier` is for the
-  test-fitted bay and `carrier_mirror` (bosses mirrored across X) for the other.
-  (A first v1 tried 4 boss rows to stay reversible; dropped.) The hole pattern is
-  only ~1.25 mm off-centre, so the two differ by ~2.5 mm.
+  mirrored left-right. The test fit was in the **right** bay.
+  - One carrier still fits both bays (front stays front): it has inserts for both.
+    Mirrored, the left bay's nearest holes are only 2.5 mm from the right bay's,
+    too close for two inserts, so the left bay uses its pads' other holes.
+  - From the carrier's +X edge: right bay 20.1 and 106.2, left bay 10.5 and 97.6.
+    Each pair (~9 apart) shares one widened boss: 8 inserts, 4 used per bay.
+  - Earlier tries, dropped: 4 boss rows (to turn the carrier around), then a
+    separate mirrored carrier.
 - Carrier 1 mm shorter (`height_trim`; first set to 2, the user chose 1).
 - Groove clearance 1.0 → 0.4 total; vertical clearance 1.5 → 0.8 (v0 printed ~0.5
   tight vertically).

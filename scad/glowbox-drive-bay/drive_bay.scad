@@ -16,11 +16,8 @@
 //
 // Parts (set with -D part=\"...\"):
 //   assembly     carrier + 3 drives + rails, one drive half pushed out
-//   carrier      full carrier for the bay test-fitted on 2026-11-01, print
-//                orientation
-//   carrier_mirror  the same, mirrored left-right for the other bay (the
-//                case's mount holes are mirrored left-right, at the same
-//                depth: P_20261102_002022)
+//   carrier      full carrier, print orientation. The same part fits both
+//                bays (front stays front): it has inserts for both bays' holes.
 //   slice        first slice_d mm of the carrier (incl. the front mount row)
 //   rail         two per drive (top and bottom are the same part), print
 //                orientation (drive face down)
@@ -73,11 +70,13 @@ bay_h = 149.7;      // side bay front opening, height
    128.8 wide x 153 deep, as installed in the test bay. */
 mount_y_front = 52.4;  // carrier front face -> front row
 mount_y_back  = 23.3;  // carrier back face -> rear row
-// From the carrier's +X edge as test-fitted, the hole of each end pad
-// nearer that edge. The pads' other holes are at 31.2 and 118.3; the middle
-// pad (~66 and ~77) is unused. The other bay's pads are the mirror image
-// (P_20261102_002022), hence carrier_mirror.
+// The test fit was in the RIGHT bay (seen from the front).
+// From the carrier's +X edge as test-fitted: the hole of each end pad
+// nearer that edge, and the pads' other holes. The middle pad (~66 and
+// ~77) is unused. The other bay's pads are the mirror image, at the same
+// depth (P_20261102_002022).
 mount_x_edge  = [20.1, 106.2];
+mount_x_other = [31.2, 118.3];
 insert_d    = 4.0;    // hole for an M3 heat-set, 4 mm OD x 5 mm long
 m3_clear_d  = 3.4;
 case_sheet  = 1.0;    // top plate thickness, guessed; sets the screw reach
@@ -162,8 +161,14 @@ top_h   = car_h - zt;
 // from the front.
 car_d   = pocket_d + hdd_l + 0.5;
 mount_y = [mount_y_front, car_d - mount_y_back];
-// for the test-fitted bay; carrier_mirror negates these
-mount_x = [for (d = mount_x_edge) car_w / 2 - d];
+// Inserts for both bays, so one carrier fits either. Mirrored, the other
+// bay's holes land at car_w - (20.1, 31.2, 106.2, 118.3) from this edge;
+// its 22.6 and 108.7 are too close to this bay's 20.1 and 106.2 for two
+// inserts, so it uses its pads' other holes (10.5 and 97.6) instead.
+// Right bay: inserts at 20.1 and 106.2; left bay: 10.5 and 97.6. Each
+// pair of inserts (~9 apart) shares one widened boss.
+mount_x = [for (d = concat(mount_x_edge, [for (o = mount_x_other) car_w - o]))
+           car_w / 2 - d];
 rail_tag_l = hdd_side_hole_y[1] - hdd_side_hole_y[0] - cbore_d - 2;
 // rear detent: the bump that lands in the carrier's rear notch
 det_y_rear = car_d - 2 * pocket_d - det_y;
@@ -232,30 +237,27 @@ module along_x(w, x0 = 0) translate([x0 - w / 2, 0, 0]) rotate([90, 0, 90]) line
 // Top zone. Everything here prints front-face-down without support: the
 // skirt is flush with the front face, so it starts on the bed, and each boss ramps up from the groove plate at
 // 45 deg on its front side before reaching full height at the insert.
-module top_zone(m = 1) {
+module top_zone() {
     // 2D (u, v) = (Y, Z)
     along_x(car_w) {
         // skirt: a wall flush with the front face, full width
         translate([0, zt - 0.01]) square([skirt_w, top_h + 0.01]);
     }
     for (yh = mount_y, x = mount_x) {
-        along_x(2 * boss_r, m * x)
+        along_x(2 * boss_r, x)
             polygon([[yh - boss_r - top_h, zt - 0.01], [yh - boss_r, car_h],
                      [yh + boss_r, car_h], [yh + boss_r, zt - 0.01]]);
     }
 }
 
-// mirrored: the other bay's carrier. Only the bosses move; everything else
-// is symmetric across X, and the tag still reads the right way.
-module carrier(mirrored = false) {
-    m = mirrored ? -1 : 1;
+module carrier() {
     difference() {
         union() {
             translate([-car_w / 2, 0, 0]) cube([car_w, car_d, zt]);
-            top_zone(m);
+            top_zone();
             // provenance tag on top of the groove plate, along the depth
             // between the boss columns
-            translate([m * (mount_x[0] + mount_x[1]) / 2, car_d / 2, zt - 0.01])
+            translate([(max(mount_x) - boss_r + min(mount_x) + boss_r) / 2, car_d / 2, zt - 0.01])
                 rotate([0, 0, 90]) provenance(size = car_tag_size);
         }
         // the drive space between the plates, open front and back
@@ -274,9 +276,9 @@ module carrier(mirrored = false) {
                 translate([x + sx * (rail_w / 2 + det_bump - det_r), y, z0 - 0.5])
                     cylinder(r = det_r + 0.3, h = groove_d + 1);
         }
-        // M3 heat-sets in the top face, under the holes the old cage used
+        // M3 heat-sets in the top face, under the case's pad holes
         for (y = mount_y, x = mount_x)
-            translate([m * x, y, car_h]) {
+            translate([x, y, car_h]) {
                 translate([0, 0, -5.5]) cylinder(d = insert_d, h = 6);
                 translate([0, 0, -mount_hole_depth]) cylinder(d = m3_clear_d - 0.2, h = mount_hole_depth);
             }
@@ -323,8 +325,6 @@ if (part == "assembly") {
     }
 } else if (part == "carrier") {
     rotate([90, 0, 0]) carrier();       // front face down
-} else if (part == "carrier_mirror") {
-    rotate([90, 0, 0]) carrier(true);
 } else if (part == "slice") {
     rotate([90, 0, 0])
         intersection() {
