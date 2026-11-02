@@ -170,7 +170,9 @@ through the two side bays.
       other bay the carrier is turned around and the skirt sits at the back, which
       blocks air just as well.
     - Each boss ramps up at 45° on its front side, so the whole carrier still prints
-      front face down with no supports.
+      front face down with no supports. (2026-11-02) Each pair of inserts, one per
+      bay, shares one boss. Its ramp is a 3 mm fin that flares out at 45° to the
+      boss width just in front of the boss.
   - Solid volume went from 838 to about 340 cm³. Sliced in Orca (standard Kobra Max
     process, 18% sparse infill), two carriers went from 727 g to 510 g: −217 g, −30%,
     about 255 g per carrier.
@@ -203,7 +205,7 @@ through the two side bays.
   to that cell's struts, so it never starts printing in mid-air. `mesh_style`: "tri" (default) is a triangle truss
   (struts along Y plus ±45° diagonals, 45° roofs, stiff because the struts stretch
   instead of bend); "hex" is the 8 mm honeycomb (whole cells only). `-D mesh=false`
-  gives the solid carrier. Solid volume: none 359, hex 270 (2 mm web), tri 238 cm³
+  gives the solid carrier. Solid volume: none 359, hex 270 (2 mm web), tri 220 cm³
   (3 mm struts).
 - **Provenance tags (2026-10-31):** on the carrier, raised on the back face of the
   front skirt (moved there 2026-11-02 to make room for the top-plate mesh; it is in

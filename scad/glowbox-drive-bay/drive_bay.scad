@@ -90,6 +90,8 @@ wall_t    = 3;      // carrier side walls
 floor_t   = 4;      // plate under/over each groove: drives sit as low as possible
 skirt_w   = 3;      // top-zone skirt thickness (flat with the front face)
 boss_r    = 5;      // around each M3 heat-set in the top zone
+boss_web  = 3;      // the 45 deg ramp under a boss is this thin until it
+                    // flares out at 45 deg (in plan) to the boss's width
 // v0 had 1.5 here and 1.0 groove clearance; the test print had ~1 mm of play
 // both ways, so this prints about 0.5 tight vertically and true sideways.
 v_clear   = 0.8;    // drive+rails vertical play in the grooves
@@ -325,9 +327,19 @@ module mesh_holes(r, h, keep = [])
     if (mesh_style == "tri") linear_extrude(h) tri_panel(r, keep);
     else hex_holes(r, h, keep);
 
-// Plan-view footprints of the bosses (incl. their 45 deg front ramps).
-boss_keep = [for (yh = mount_y, x = mount_x)
-             [x - boss_r, yh - boss_r - top_h, x + boss_r, yh + boss_r]];
+// Each of this bay's inserts (mount_x[0], [1]) sits ~9 from the other bay's
+// nearest one, so each pair shares one boss: [centre x, half width].
+boss_cols = [for (i = [0 : 1])
+    let(e = mount_x[i], o = [mount_x[2], mount_x[3]],
+        p = abs(o[0] - e) < abs(o[1] - e) ? o[0] : o[1])
+    [(e + p) / 2, abs(e - p) / 2 + boss_r]];
+// Where a boss's flare starts: it reaches full width where the boss does.
+function boss_flare_y(yh, hw) = yh - boss_r - (hw - boss_web / 2);
+
+// Plan-view footprints of the bosses: the ramp fin, and the flare + boss.
+boss_keep = [for (yh = mount_y, c = boss_cols, k = [
+                 [c[0] - boss_web / 2, yh - boss_r - top_h, c[0] + boss_web / 2, boss_flare_y(yh, c[1])],
+                 [c[0] - c[1], boss_flare_y(yh, c[1]), c[0] + c[1], yh + boss_r]]) k];
 
 module carrier_mesh() {
     // the detent notches are cut in the groove walls, above this layer, so
@@ -346,17 +358,28 @@ module carrier_mesh() {
 
 // Top zone. Everything here prints front-face-down without support: the
 // skirt is flush with the front face, so it starts on the bed, and each boss ramps up from the groove plate at
-// 45 deg on its front side before reaching full height at the insert.
+// 45 deg on its front side before reaching full height at the insert. The
+// ramp is only a boss_web thick fin; just in front of the boss it flares
+// out at 45 deg to the boss's width, so the boss's front face never hangs
+// flat.
 module top_zone() {
     // 2D (u, v) = (Y, Z)
     along_x(car_w) {
         // skirt: a wall flush with the front face, full width
         translate([0, zt - 0.01]) square([skirt_w, top_h + 0.01]);
     }
-    for (yh = mount_y, x = mount_x) {
-        along_x(2 * boss_r, x)
+    for (yh = mount_y, c = boss_cols) intersection() {
+        hw = c[1];
+        along_x(2 * hw, c[0])
             polygon([[yh - boss_r - top_h, zt - 0.01], [yh - boss_r, car_h],
                      [yh + boss_r, car_h], [yh + boss_r, zt - 0.01]]);
+        // plan view: the fin, then the flare
+        y0 = boss_flare_y(yh, hw);
+        translate([c[0], 0, zt - 1]) linear_extrude(top_h + 2)
+            polygon([[-boss_web / 2, yh - boss_r - top_h - 1], [boss_web / 2, yh - boss_r - top_h - 1],
+                      [boss_web / 2, y0], [hw, y0 + hw - boss_web / 2],
+                      [hw, yh + boss_r + 1], [-hw, yh + boss_r + 1],
+                      [-hw, y0 + hw - boss_web / 2], [-boss_web / 2, y0]]);
     }
 }
 
