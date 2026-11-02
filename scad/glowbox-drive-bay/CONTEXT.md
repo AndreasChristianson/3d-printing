@@ -159,7 +159,7 @@ through the two side bays.
     missing on some high-capacity drives.
   - **Check the hole positions with calipers on a spare drive.**
 - **`drive_bay.scad`:** the carrier, rails and filler. Parts: `assembly`,
-  `carrier`, `slice`, `rail_top`, `rail_bottom`, `filler`.
+  `carrier`, `slice`, `rail` (v0 had `rail_top` + `rail_bottom`), `filler`.
   - Carrier: 128.8 W × 148.2 H × 153 D, 0.75 mm clearance per side in the opening.
   - **Drives sit as low as possible:** the bottom and top groove plates are 9 mm each
     (5 mm groove + 4 mm floor).
@@ -223,11 +223,48 @@ through the two side bays.
   Measure the opening (it's open and reachable) before printing.
 
 ### Suggested test order
-1. Print `rail_top` + `rail_bottom` and screw them to a spare or retired drive. This checks the hole positions.
+1. Print 2 × `rail` and screw them to a spare or retired drive. This checks the hole positions.
 2. Print `slice` (45 mm deep, includes the front mount row). Slide the railed drive
    through it to check the groove fit and the detent click. When a cage is out,
    offer the slice up under the top plate to check the front row of holes.
 3. Print the full `carrier` (×2, same file) only after both pass.
+
+## Test fit of v0 (2026-11-01) and v1 changes
+
+glowbox was shut down, so the printed v0 carrier went into the bay with a railed
+spare drive.
+
+**What was wrong**
+- **Mount holes** didn't line up. The case holes were marked through onto the carrier
+  with a file and measured with calipers (`P_20261101_2352*`–`_2354*`; several
+  displays are upside down in the photos):
+  - each pad's two holes are ~12 mm apart, not 8;
+  - the end pads are ~86 apart (pitch ~43), not 2 × 28.9;
+  - the rows sit 52.4 from the carrier front and 23.3 from its back (77.3 apart),
+    ~14.5 further back than v0.
+  - From the middle-side (+X) edge, the marks are at 20.1 / 31.2 (near pad) and
+    106.2 / 118.3 (far pad). v1 uses 20.1 and 106.2, the holes nearer the
+    middle-side wall, like the old cage.
+- **Height:** 1–2 mm too tall.
+- **Rails:** about 1 mm of play side to side and up and down; the detent bumps barely
+  touched the groove walls.
+- **Counterbores:** too small for some drive screws (heads up to 7.8 mm,
+  `P_20261102_000255`).
+
+**v1 changes (drive_bay.scad)**
+- Bosses at the measured positions. Rows aren't centred in the depth any more, so
+  there are 4 boss rows (the measured pair, plus the same pair seen from the back)
+  to keep one carrier for both bays, turned around. The front-most bosses merge into
+  the skirt.
+- Carrier 2 mm shorter (`height_trim`).
+- Groove clearance 1.0 → 0.4 total; vertical clearance 1.5 → 0.8 (v0 printed ~0.5
+  tight vertically).
+- Rail 30 → 31 wide; 4 detent bumps per rail (both edges, front and rear) to match
+  the 4 notches per groove; bumps 0.8 → 1.0 proud.
+- Screw holes on both sides of the rail, so top and bottom rails are the same part
+  (`part="rail"`, print 2 per drive).
+- Counterbores 7.5 → 8.6.
+- Slice is 60 deep, so it includes the measured front row.
 
 ## Photos
 
@@ -235,3 +272,4 @@ through the two side bays.
 - `P_20261025_*`: the old cage out of the case
 - `P_20261027_*`, `P_20261028_0059*`: the case and the caliper measurements
 - `P_20261028_0117*`: the hinged front door
+- `P_20261101_*`, `P_20261102_*`: v0 test fit: hole marks, caliper readings, a screw head
