@@ -126,8 +126,24 @@ det_bump = 1.0;     // how far the bump stands proud of the rail edge
 
 slice_d = 60;       // reaches past the measured front mount row (52.4)
 
-// Provenance tags: raised on the carrier's top face, along the depth between
-// the boss columns. On each rail it sits in a pocket in the outer face
+// Mesh (cost reduction): holes through the side walls, and a mesh
+// floor_t deep into the outer face of each plate: under a groove it goes
+// through the groove floor, under a rib it is a blind pocket, so the groove
+// walls (the detent bumps ride along them) stay whole. The carrier prints
+// front face down, so +Y is up on the printer: every hole has a pointed
+// roof along Y (no flat ceiling). Solid: the detent notches, the tab pockets
+// at both ends, and the top plate under each boss.
+// "hex": honeycomb, whole cells only (60 deg roofs).
+// "tri": triangle truss, see tri_panel (45 deg roofs).
+mesh        = true;
+mesh_style  = "tri";
+mesh_f      = 8;     // hex across flats
+mesh_tri_a  = 20;    // triangle cell: 2a along Y, a across
+mesh_web    = 3;     // between holes
+mesh_margin = 3;     // solid border around each panel
+
+// Provenance tags: raised on the back face of the carrier's front skirt
+// (v0 had it on the top face, where the top groove mesh now is). On each rail it sits in a pocket in the outer face
 // between the screw holes, raised from the pocket floor but below the face,
 // so it can't catch in the groove. (v0's text engraved straight into the
 // face was unreadable.)
@@ -234,6 +250,93 @@ module rail() {
 // YZ profile extruded across X, centred on x0.
 module along_x(w, x0 = 0) translate([x0 - w / 2, 0, 0]) rotate([90, 0, 90]) linear_extrude(w) children();
 
+// Centres of the whole hexes (corners along v) that fit in the panel
+// [u0, v0, u1, v1], keeping a web's width clear of each keep-out rectangle.
+mesh_px = mesh_f + mesh_web;
+mesh_py = mesh_px * sqrt(3) / 2;
+mesh_hr = mesh_f / sqrt(3);     // centre to corner
+function hex_cells(r, keep = []) = let(
+    uc = (r[0] + r[2]) / 2, vc = (r[1] + r[3]) / 2,
+    n  = ceil(max(r[2] - r[0], r[3] - r[1]) / mesh_py) + 1)
+    [for (j = [-n : n], i = [-n : n])
+        let(u = uc + (i + (abs(j) % 2) / 2) * mesh_px, v = vc + j * mesh_py,
+            a = mesh_f / 2, b = mesh_hr)
+        if (u - a >= r[0] && u + a <= r[2] && v - b >= r[1] && v + b <= r[3]
+            && len([for (k = keep)
+                    if (u + a + mesh_web > k[0] && u - a - mesh_web < k[2] &&
+                        v + b + mesh_web > k[1] && v - b - mesh_web < k[3]) 1]) == 0)
+            [u, v]];
+
+// Hex prisms h tall (from Z=0) on a panel in the XY plane, corners along Y.
+module hex_holes(r, h, keep = [])
+    for (c = hex_cells(r, keep)) translate([c[0], c[1], 0])
+        rotate(30) cylinder(r = mesh_hr, h = h, $fn = 6);
+
+// Triangle lattice: struts along v plus diagonals at +-45 deg, which split
+// the panel into right triangles with an edge along v and their right-angle
+// corner pointing across, so every roof is 45 deg. It is a truss (the
+// struts stretch instead of bending), so it stays stiff with big cells.
+// Cells may be cut by the panel's sides (a wall along v) and bottom (a
+// floor), but not its top: a cell whose tip would reach past the top edge
+// is dropped, since the cut would be a flat roof. Keep-outs get a 45 deg
+// point underneath for the same reason.
+module tri_panel(r, keep = []) {
+    a  = mesh_tri_a;
+    d  = mesh_web / 2;
+    tip = d / tan(22.5);    // insetting a 45 deg corner pulls its tip this far in
+    uc = (r[0] + r[2]) / 2;
+    // a row of cell tips lands exactly on the top edge, so none is lost there
+    vc = r[3] + tip - a;
+    nu = ceil((r[2] - r[0]) / (2 * a)) + 1;
+    nv = ceil((r[3] - r[1]) / a) + 1;
+    // remove slivers under 1 mm; delta offsets keep the corners sharp
+    offset(delta = 0.5) offset(delta = -0.5) difference() {
+        intersection() {
+            translate([r[0], r[1]]) square([r[2] - r[0], r[3] - r[1]]);
+            // each diamond (centre where j + l is odd) splits into two
+            // triangles along its vertical diagonal
+            for (j = [-nu : nu], l = [-nv : 1], s = [-1, 1])
+                let(cu = uc + j * a, cv = vc + l * a)
+                if ((j + l) % 2 != 0 && cv + a - tip <= r[3])
+                    offset(delta = -d)
+                        polygon([[cu + s * a, cv], [cu, cv + a], [cu, cv - a]]);
+        }
+        for (k = keep) let(w = k[2] - k[0] + 2 * mesh_web)
+            hull() {
+                translate([k[0] - mesh_web, k[1] - mesh_web])
+                    square([w, k[3] - k[1] + 2 * mesh_web]);
+                translate([(k[0] + k[2]) / 2, k[1] - mesh_web - w / 2]) square(0.01, center = true);
+            }
+    }
+}
+
+// Holes h tall (from Z=0) on a panel [u0, v0, u1, v1] in the XY plane,
+// clear of the keep-out rectangles; corners point along +Y.
+module mesh_holes(r, h, keep = [])
+    if (mesh_style == "tri") linear_extrude(h) tri_panel(r, keep);
+    else hex_holes(r, h, keep);
+
+// Plan-view footprints of the bosses (incl. their 45 deg front ramps).
+boss_keep = [for (yh = mount_y, x = mount_x)
+             [x - boss_r, yh - boss_r - top_h, x + boss_r, yh + boss_r]];
+
+module carrier_mesh() {
+    nr = det_r + 0.3;
+    notch_keep = [for (x = drive_x, sx = [-1, 1], y = [pocket_d + det_y, pocket_d + det_y_rear])
+                  let(cx = x + sx * (rail_w / 2 + det_bump - det_r))
+                  [cx - nr, y - nr, cx + nr, y + nr]];
+    r = [-car_w / 2 + wall_t + mesh_margin, pocket_d + mesh_margin,
+         car_w / 2 - wall_t - mesh_margin, car_d - pocket_d - mesh_margin];
+    translate([0, 0, -1]) mesh_holes(r, 1 + floor_t, notch_keep);
+    translate([0, 0, zt - floor_t]) mesh_holes(r, floor_t + 1, concat(notch_keep, boss_keep));
+    // side walls, over the drive space: panel u = Z, v = Y
+    for (s = [-1, 1])
+        translate([s * (car_w / 2 - wall_t / 2) - (wall_t + 2) / 2, 0, 0])
+            multmatrix([[0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]])
+                mesh_holes([plate_t + mesh_margin, mesh_margin,
+                           plate_t + inner_h - mesh_margin, car_d - mesh_margin], wall_t + 2);
+}
+
 // Top zone. Everything here prints front-face-down without support: the
 // skirt is flush with the front face, so it starts on the bed, and each boss ramps up from the groove plate at
 // 45 deg on its front side before reaching full height at the insert.
@@ -255,11 +358,12 @@ module carrier() {
         union() {
             translate([-car_w / 2, 0, 0]) cube([car_w, car_d, zt]);
             top_zone();
-            // provenance tag on top of the groove plate, along the depth
-            // between the boss columns
-            translate([(max(mount_x) - boss_r + min(mount_x) + boss_r) / 2, car_d / 2, zt - 0.01])
-                rotate([0, 0, 90]) provenance(size = car_tag_size);
+            // provenance tag on the skirt's back face, read from behind; it
+            // prints on top of the skirt
+            translate([0, skirt_w - 0.01, zt + top_h / 2])
+                rotate([90, 0, 180]) provenance(size = car_tag_size);
         }
+        if (mesh) carrier_mesh();
         // the drive space between the plates, open front and back
         translate([-car_w / 2 + wall_t, -1, plate_t]) cube([car_w - 2 * wall_t, car_d + 2, inner_h]);
         for (x = drive_x) for (bottom = [true, false]) {

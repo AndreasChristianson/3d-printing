@@ -193,8 +193,19 @@ through the two side bays.
     way in.
 - **STLs are in print orientation:** carrier and slice front face down, rails
   drive face down.
-- **Provenance tags (2026-10-31):** raised on the carrier's top face between the boss
-  rows (it shows on the slice only if the slice is made deeper); inset 0.4 mm in each
+- **Mesh (2026-11-02, cost reduction):** holes through the side walls, and a mesh
+  floor_t (4 mm) deep in the outer face of both plates. Under a groove it goes
+  through the floor, and under a rib it is a blind pocket, so the groove walls that
+  the detent bumps ride on stay whole. Every hole has a pointed roof along Y (up
+  when printed front-down). Solid keep-outs: the detent notches, the tab pockets, and
+  the plate under the bosses. `mesh_style`: "tri" (default) is a triangle truss
+  (struts along Y plus ±45° diagonals, 45° roofs, stiff because the struts stretch
+  instead of bend); "hex" is the 8 mm honeycomb (whole cells only). `-D mesh=false`
+  gives the solid carrier. Solid volume: none 359, hex 270 (2 mm web), tri 241 cm³
+  (3 mm struts; 2 mm would be 220).
+- **Provenance tags (2026-10-31):** on the carrier, raised on the back face of the
+  front skirt (moved there 2026-11-02 to make room for the top-plate mesh; it is in
+  the slice too); inset 0.4 mm in each
   rail's outer face, beside the screw holes. Render every part with
   `scad/render.sh scad/glowbox-drive-bay/drive_bay.scad <out>.stl -D 'part="..."'`.
 
