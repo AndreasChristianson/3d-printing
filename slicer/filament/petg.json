@@ -15,10 +15,10 @@
 		"Direct Drive Standard"
 	],
 	"filament_flow_ratio": [
-		"0.95"
+		"0.9408"
 	],
 	"filament_retraction_length": [
-		"0.3"
+		"0.8"
 	],
 	"filament_settings_id": [
 		"petg"
@@ -42,7 +42,7 @@
 		"240"
 	],
 	"pressure_advance": [
-		"0.06"
+		"0.021"
 	],
 	"slow_down_layer_time": [
 		"1"
