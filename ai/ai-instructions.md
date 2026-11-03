@@ -51,12 +51,14 @@ way a part found years later can be traced back to its pattern.
   `with_provenance() { part(); translate(...) provenance(w = ..., h = ...); }`.
   `provenance()` fits the text to the w × h area and **stops the render** if file + SHA
   can't reach `prov_min_stroke` (0.9 mm, about 2 extrusion lines). Text with thinner
-  strokes prints as one wiggly bead (glowbox v0/v1 tags, 2026-11).
+  strokes prints as one wiggly bead (glowbox v0/v1 tags, 2026-11). The path, and then
+  the repo, go on only if the text still reaches `prov_extra_stroke` (1.2 mm).
 - Prefer `inlay`: flush in a flat face that prints down on the bed. The first layers
-  give the crispest text, and a flush tag can go on a face that slides or mates (see
-  `rail()` in `scad/glowbox-drive-bay/drive_bay.scad`). `emboss` (the lib default) is
-  raised on a face that prints facing up. Where that face must stay flush, raise the
-  text from a shallow pocket floor, keeping its top ~0.2 mm below the face.
+  give the crispest text. `emboss` (the lib default) is raised on a face that prints
+  facing up. Where that face must stay flush, raise the text from a shallow pocket
+  floor, keeping its top ~0.2 mm below the face (see `rail()` in
+  `scad/glowbox-drive-bay/drive_bay.scad`). Don't put a face down just for the tag if
+  that makes other features bridge or overhang.
 - The tag is a separate part for a second filament. Load both STLs in Orca as one
   multi-part object, and give them the same filament to skip the swaps.
 - Font: `prov_font`, monospace, default JetBrains Mono ExtraBold. A new font needs a row

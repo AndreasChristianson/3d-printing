@@ -20,7 +20,7 @@
 //                bays (front stays front): it has inserts for both bays' holes.
 //   slice        first slice_d mm of the carrier (incl. the front mount row)
 //   rail         two per drive (top and bottom are the same part), print
-//                orientation (outer face down, for the inlaid tag)
+//                orientation (drive face down)
 //   filler       blanking plug for the 3 middle 5.25" bays
 //
 // Render:   scad/render.sh scad/glowbox-drive-bay/drive_bay.scad carrier.stl -D 'part="carrier"'
@@ -144,12 +144,17 @@ mesh_tri_a  = 20;    // triangle cell: 2a along Y, a across
 mesh_web    = 3;     // between holes
 mesh_margin = 3;     // solid border around each panel
 
-// Provenance tags (scad/lib/provenance.scad), inlaid flush in a face that
-// prints on the bed, each its own part for a second filament: the front face
-// of the carrier's skirt, and each rail's outer face between the screw
-// holes. (Earlier tags: one-bead-wide text, black on black, unreadable.)
+// Provenance tags (scad/lib/provenance.scad), each its own part for a second
+// filament. The carrier's is inlaid flush in the skirt's front face, which
+// prints on the bed. The rail prints drive face down (so the counterbores open
+// upward instead of bridging), and its tag is raised from the floor of a
+// pocket in the outer face, between the screw holes, with its top below the
+// face so it can't catch in the groove. (Earlier tags: one-bead-wide text,
+// black on black, unreadable.)
 car_tag_w  = 100;        // across the skirt
-rail_tag_w = 16;         // across the rail
+rail_tag_w = 16;         // pocket, across the rail
+rail_tag_pocket = 1.0;   // pocket depth
+rail_tag_relief = 0.2;   // text top stays this far below the face
 
 // 5.25" filler plug. GUESSED from the 3-bay standard; MEASURE the opening.
 plug_w = 146.0;
@@ -209,9 +214,11 @@ assert(hole_x + cbore_d / 2 < rail_w / 2 - det_beam - det_slot - 1,
    same part, and either way round fits the drive's holes. */
 module rail() with_provenance() {
     rail_body();
-    // flush in the outer face; it runs along the rail and reads from outside (-Z)
-    translate([0, (hdd_side_hole_y[0] + hdd_side_hole_y[1]) / 2, 0])
-        rotate([0, 180, 90]) provenance(w = rail_tag_l - 2, h = rail_tag_w - 2, mode = "inlay");
+    // raised from the pocket floor; it runs along the rail and reads from
+    // outside (-Z)
+    translate([0, (hdd_side_hole_y[0] + hdd_side_hole_y[1]) / 2, rail_tag_pocket])
+        rotate([0, 180, 90])
+            provenance(w = rail_tag_l - 2, h = rail_tag_w - 2, depth = rail_tag_pocket - rail_tag_relief);
 }
 
 module rail_body() {
@@ -236,6 +243,9 @@ module rail_body() {
         for (s = [-1, 1], y = [det_y, det_y_rear])
             translate([s * (rail_w / 2 - det_beam - det_slot / 2), y, rail_t / 2])
                 cube([det_slot, det_len, rail_t + 2], center = true);
+        // pocket for the provenance tag, between the counterbores
+        translate([-rail_tag_w / 2, hdd_side_hole_y[0] + cbore_d / 2 + 1, -1])
+            cube([rail_tag_w, rail_tag_l, 1 + rail_tag_pocket]);
     }
     // detent bumps on the beams' outer edges
     for (s = [-1, 1], y = [det_y, det_y_rear])
@@ -464,7 +474,7 @@ if (part == "assembly") {
             translate([-car_w, 0, -1]) cube([2 * car_w, slice_d, car_h + 2]);
         }
 } else if (part == "rail") {
-    rail();                             // outer face down
+    translate([0, 0, rail_t]) rotate([0, 180, 0]) rail();
 } else if (part == "filler") {
     filler();
 }

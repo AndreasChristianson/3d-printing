@@ -29,9 +29,10 @@
 //
 // Legibility comes from the stroke width: a stem has to be about two
 // extrusion lines wide (prov_min_stroke) or it prints as one wiggly bead.
-// The tag picks the richest field set whose text still reaches that stroke
-// in the given area, from file + SHA up to repo + path + SHA, and stops the
-// render if even file + SHA doesn't fit.
+// The tag is file + SHA, and stops the render if that can't reach
+// prov_min_stroke in the given area. The path, and then the repo, are added
+// only if the text still reaches prov_extra_stroke with them, so they never
+// shrink the essentials to the bare minimum.
 
 prov_repo  = "github.com/AndreasChristianson/3d-printing";
 scad_path  = "untagged.scad";   // set by render.sh
@@ -42,6 +43,7 @@ prov_mode  = "emboss";  // "emboss" | "inlay"
 prov_depth = 0.6;       // 3 layers at 0.2; use 0.8 for light text on a dark part
 prov_font  = "JetBrains Mono:style=ExtraBold";
 prov_min_stroke  = 0.9; // ~2 lines of a 0.4 nozzle
+prov_extra_stroke = 1.2; // the path and repo only go on at this stroke or more
 prov_max_stroke  = 1.5; // caps the size in a big area
 prov_upper       = "auto";  // true | false | "auto": caps when the stroke is
 prov_upper_below = 1.2;     //   thinner than this; the SHA is always caps
@@ -80,8 +82,8 @@ function prov_fit(lines, w, h, m) =
         h / (line_h + (n - 1) * (line_h + prov_lead)),
         prov_max_stroke / m[1]);
 
-// The richest layout that reaches prov_min_stroke: [lines, size], or
-// undef. Each field set is tried stacked and on one line.
+// The richest layout whose stroke is enough for its fields: [lines, size],
+// or undef. Each field set is tried stacked and on one line.
 function prov_layout(w, h, m) =
     let (sha  = prov_upcase(git_sha),
          sets = [[prov_repo, scad_path, sha], [scad_path, sha], [prov_basename(scad_path), sha]],
@@ -90,7 +92,8 @@ function prov_layout(w, h, m) =
                           s_stack = prov_fit(f, w, h, m),
                           s_one   = prov_fit(one, w, h, m))
                      s_stack >= s_one ? [f, s_stack] : [one, s_one]],
-         ok = [for (l = fits) if (l[1] * m[1] >= prov_min_stroke) l])
+         need = [prov_extra_stroke, prov_extra_stroke, prov_min_stroke],
+         ok = [for (i = [0 : len(fits) - 1]) if (fits[i][1] * m[1] >= need[i]) fits[i]])
     len(ok) > 0 ? ok[0] : undef;
 
 module provenance(w, h, mode = prov_mode, depth = prov_depth, font = prov_font,
