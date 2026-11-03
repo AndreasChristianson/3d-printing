@@ -43,17 +43,26 @@ Printer configs can contain credentials. When importing:
 
 ## SCAD parts: provenance tags
 
-Functional parts that have room for it carry an embossed provenance tag: the repo, the
-`.scad`'s path in the repo, and the git SHA + commit date it was rendered from. That
+Functional parts that have room for it carry a provenance tag: the `.scad` file name and
+the git SHA it was rendered from, plus the repo path and the repo when there's room. That
 way a part found years later can be traced back to its pattern.
 
-- `include <../lib/provenance.scad>` and place `provenance()` on a flat face that isn't
-  cosmetic (inside or back), as a raised tag on a surface that prints facing up.
-- Don't engrave the text straight into a face; small engraved text came out
-  unreadable (glowbox rails, 2026-11). Where the face must stay flush (it slides or
-  mates), cut a shallow pocket and raise the text from its floor, keeping the text top
-  ~0.2 mm below the face (see `rail()` in `scad/glowbox-drive-bay/drive_bay.scad`).
-- Render with `scad/render.sh path/to/part.scad [out.stl]`, which fills in the path,
-  SHA and date. **Commit before rendering** for print: uncommitted changes get a
-  `-dirty` SHA, and a plain `openscad -o` render shows the placeholder `nosha`.
-- Skip it on small parts and on decorative or cosmetic ones.
+- `include <../lib/provenance.scad>` and wrap the part:
+  `with_provenance() { part(); translate(...) provenance(w = ..., h = ...); }`.
+  `provenance()` fits the text to the w × h area and **stops the render** if file + SHA
+  can't reach `prov_min_stroke` (0.9 mm, about 2 extrusion lines). Text with thinner
+  strokes prints as one wiggly bead (glowbox v0/v1 tags, 2026-11).
+- Prefer `inlay`: flush in a flat face that prints down on the bed. The first layers
+  give the crispest text, and a flush tag can go on a face that slides or mates (see
+  `rail()` in `scad/glowbox-drive-bay/drive_bay.scad`). `emboss` (the lib default) is
+  raised on a face that prints facing up. Where that face must stay flush, raise the
+  text from a shallow pocket floor, keeping its top ~0.2 mm below the face.
+- The tag is a separate part for a second filament. Load both STLs in Orca as one
+  multi-part object, and give them the same filament to skip the swaps.
+- Font: `prov_font`, monospace, default JetBrains Mono ExtraBold. A new font needs a row
+  in `prov_fonts`; measure it with `scad/lib/font_metrics.sh`. The SHA is always caps;
+  the rest goes caps when the stroke is under `prov_upper_below` (`prov_upper`).
+- Render with `scad/render.sh path/to/part.scad [out.stl]`. It fills in the path and SHA
+  and writes `out.stl` plus `out.tag.stl`. **Commit before rendering** for print:
+  uncommitted changes get a `+` on the SHA, and a plain `openscad -o` render shows the
+  placeholder `NOSHA`.

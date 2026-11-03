@@ -18,7 +18,7 @@
 // are walls standing on the bed, so they flex in the print plane.
 //
 // Render:  scad/render.sh scad/glowbox-drive-bay/bay_blank.scad
-// (fills in the provenance tag on the back of the face)
+// (fills in the provenance tag, inlaid in the front face)
 
 include <../lib/provenance.scad>
 
@@ -75,7 +75,18 @@ module root_gusset() {
             polygon([[0, 0], [-root_g, 0], [0, root_g]]);
 }
 
-module bay_blank() {
+// tag area on the front face: between the rims, clear of the arm slits and
+// root gussets
+tag_w = blank_w - 2 * (arm_t + slit + root_g + 2);
+tag_h = blank_h - 2 * (rim_t + 1);
+
+module bay_blank() with_provenance() {
+    bay_blank_body();
+    // flush in the front face, reads from the front; it prints on the bed
+    rotate([0, 180, 0]) provenance(w = tag_w, h = tag_h, mode = "inlay");
+}
+
+module bay_blank_body() {
     difference() {
         union() {
             // face
@@ -93,8 +104,6 @@ module bay_blank() {
             // tabs
             for (sx = [-1, 1], y = tab_y)
                 translate([sx * blank_w / 2, y, 0]) mirror([sx < 0 ? 1 : 0, 0, 0]) tab();
-            // provenance tag on the back of the face, reads from behind
-            translate([0, 0, face_t - 0.01]) provenance(size = 3.5);
         }
         for (sx = [-1, 1], sy = [-1, 1]) {
             // slit along the inside of each arm, through the face, from the

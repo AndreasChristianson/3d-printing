@@ -3,8 +3,13 @@
 #
 #   scad/render.sh path/to/part.scad [out.stl] [extra openscad args...]
 #
-# The tag gets the file's repo-relative path and HEAD's short SHA and commit
-# date. Commit first: a file with uncommitted changes gets "-dirty" on its SHA.
+# The tag gets the file's repo-relative path and HEAD's short SHA. Commit
+# first: a file with uncommitted changes gets a "+" on its SHA.
+#
+# A part that uses with_provenance() renders as two STLs, the body (out.stl)
+# and the tag (out.tag.stl), so the tag can print in a second filament: load
+# both in Orca at once and accept "load as a single object with multiple
+# parts".
 set -euo pipefail
 
 src=$1
@@ -20,15 +25,16 @@ top=$(git rev-parse --show-toplevel)
 path=$(git ls-files --full-name --error-unmatch "$src" 2>/dev/null \
     || echo "$(git rev-parse --show-prefix)$src")
 sha=$(git rev-parse --short HEAD)
-date=$(git log -1 --format=%cs HEAD)
 if ! git diff --quiet HEAD -- "$src" "$top/scad/lib" 2>/dev/null \
     || [ -z "$(git ls-files "$src")" ]; then
-    sha="$sha-dirty"
+    sha="$sha+"
 fi
 
-echo "tag: $path @ $sha $date"
-"$openscad" -o "$out" \
-    -D "scad_path=\"$path\"" \
-    -D "git_sha=\"$sha\"" \
-    -D "git_date=\"$date\"" \
-    "$@" "$src"
+echo "tag: $path @ $sha"
+tag=(-D "scad_path=\"$path\"" -D "git_sha=\"$sha\"")
+if grep -q "with_provenance" "$src"; then
+    "$openscad" -o "$out" "${tag[@]}" -D 'prov_part="body"' "$@" "$src"
+    "$openscad" -o "${out%.stl}.tag.stl" "${tag[@]}" -D 'prov_part="tag"' "$@" "$src"
+else
+    "$openscad" -o "$out" "${tag[@]}" "$@" "$src"
+fi

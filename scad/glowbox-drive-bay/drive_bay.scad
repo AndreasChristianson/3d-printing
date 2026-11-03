@@ -20,7 +20,7 @@
 //                bays (front stays front): it has inserts for both bays' holes.
 //   slice        first slice_d mm of the carrier (incl. the front mount row)
 //   rail         two per drive (top and bottom are the same part), print
-//                orientation (drive face down)
+//                orientation (outer face down, for the inlaid tag)
 //   filler       blanking plug for the 3 middle 5.25" bays
 //
 // Render:   scad/render.sh scad/glowbox-drive-bay/drive_bay.scad carrier.stl -D 'part="carrier"'
@@ -144,16 +144,12 @@ mesh_tri_a  = 20;    // triangle cell: 2a along Y, a across
 mesh_web    = 3;     // between holes
 mesh_margin = 3;     // solid border around each panel
 
-// Provenance tags: raised on the back face of the carrier's front skirt
-// (v0 had it on the top face, where the top groove mesh now is). On each rail it sits in a pocket in the outer face
-// between the screw holes, raised from the pocket floor but below the face,
-// so it can't catch in the groove. (v0's text engraved straight into the
-// face was unreadable.)
-car_tag_size  = 3.5;
-rail_tag_size = 2.8;
-rail_tag_w      = 16;    // pocket, across the rail
-rail_tag_pocket = 1.0;   // pocket depth
-rail_tag_relief = 0.2;   // text top stays this far below the face
+// Provenance tags (scad/lib/provenance.scad), inlaid flush in a face that
+// prints on the bed, each its own part for a second filament: the front face
+// of the carrier's skirt, and each rail's outer face between the screw
+// holes. (Earlier tags: one-bead-wide text, black on black, unreadable.)
+car_tag_w  = 100;        // across the skirt
+rail_tag_w = 16;         // across the rail
 
 // 5.25" filler plug. GUESSED from the 3-bay standard; MEASURE the opening.
 plug_w = 146.0;
@@ -211,7 +207,14 @@ assert(hole_x + cbore_d / 2 < rail_w / 2 - det_beam - det_slot - 1,
    Z=rail_t the face against the drive. It is symmetric across X (screw
    holes and detents on both edges), so the top and bottom rails are the
    same part, and either way round fits the drive's holes. */
-module rail() {
+module rail() with_provenance() {
+    rail_body();
+    // flush in the outer face; it runs along the rail and reads from outside (-Z)
+    translate([0, (hdd_side_hole_y[0] + hdd_side_hole_y[1]) / 2, 0])
+        rotate([0, 180, 90]) provenance(w = rail_tag_l - 2, h = rail_tag_w - 2, mode = "inlay");
+}
+
+module rail_body() {
     difference() {
         union() {
             // body, chamfered at the leading end so it finds the groove
@@ -233,15 +236,7 @@ module rail() {
         for (s = [-1, 1], y = [det_y, det_y_rear])
             translate([s * (rail_w / 2 - det_beam - det_slot / 2), y, rail_t / 2])
                 cube([det_slot, det_len, rail_t + 2], center = true);
-        // pocket for the provenance tag, between the counterbores
-        translate([-rail_tag_w / 2, hdd_side_hole_y[0] + cbore_d / 2 + 1, -1])
-            cube([rail_tag_w, rail_tag_l, 1 + rail_tag_pocket]);
     }
-    // provenance tag, raised from the pocket floor; it runs along the rail
-    // and reads from outside
-    translate([0, (hdd_side_hole_y[0] + hdd_side_hole_y[1]) / 2, rail_tag_relief])
-        mirror([1, 0, 0]) rotate([0, 0, 90])
-            provenance(size = rail_tag_size, depth = rail_tag_pocket - rail_tag_relief + 0.01);
     // detent bumps on the beams' outer edges
     for (s = [-1, 1], y = [det_y, det_y_rear])
         translate([s * (rail_w / 2 + det_bump - det_r), y, 0])
@@ -383,15 +378,18 @@ module top_zone() {
     }
 }
 
-module carrier() {
+module carrier() with_provenance() {
+    carrier_body();
+    // flush in the skirt's front face, read from the front; it prints on the bed
+    translate([0, 0, zt + top_h / 2])
+        rotate([90, 0, 0]) provenance(w = car_tag_w, h = top_h - 4, mode = "inlay");
+}
+
+module carrier_body() {
     difference() {
         union() {
             translate([-car_w / 2, 0, 0]) cube([car_w, car_d, zt]);
             top_zone();
-            // provenance tag on the skirt's back face, read from behind; it
-            // prints on top of the skirt
-            translate([0, skirt_w - 0.01, zt + top_h / 2])
-                rotate([90, 0, 180]) provenance(size = car_tag_size);
         }
         if (mesh) carrier_mesh();
         // the drive space between the plates, open front and back
@@ -466,7 +464,7 @@ if (part == "assembly") {
             translate([-car_w, 0, -1]) cube([2 * car_w, slice_d, car_h + 2]);
         }
 } else if (part == "rail") {
-    translate([0, 0, rail_t]) rotate([0, 180, 0]) rail();
+    rail();                             // outer face down
 } else if (part == "filler") {
     filler();
 }

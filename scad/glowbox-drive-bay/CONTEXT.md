@@ -194,7 +194,8 @@ through the two side bays.
     both ends, so the bump gives one extra click as it passes the far notch on the
     way in.
 - **STLs are in print orientation:** carrier and slice front face down, rails
-  drive face down.
+  outer face down (since 2026-11-02, for the inlaid tag; until then drive face down,
+  so the counterbores opened upward instead of bridging their screw-head seats).
 - **Mesh (2026-11-02, cost reduction):** holes through the side walls, and a mesh
   floor_t (4 mm) deep in the outer face of both plates. Under a groove it goes
   through the floor, and under a rib it is a blind pocket, so the groove walls that
@@ -207,11 +208,17 @@ through the two side bays.
   instead of bend); "hex" is the 8 mm honeycomb (whole cells only). `-D mesh=false`
   gives the solid carrier. Solid volume: none 359, hex 270 (2 mm web), tri 220 cm³
   (3 mm struts).
-- **Provenance tags (2026-10-31):** on the carrier, raised on the back face of the
-  front skirt (moved there 2026-11-02 to make room for the top-plate mesh; it is in
-  the slice too); inset 0.4 mm in each
-  rail's outer face, beside the screw holes. Render every part with
-  `scad/render.sh scad/glowbox-drive-bay/drive_bay.scad <out>.stl -D 'part="..."'`.
+- **Provenance tags (2026-10-31; v2 2026-11-02):** v2 (scad/lib/provenance.scad) is
+  inlaid flush in a face that prints on the bed, as a separate tag STL for a second
+  filament: the front face of the carrier's skirt (in the slice too), each rail's outer
+  face between the screw holes, and the bay blank's front face. The carrier and blank
+  tags are visible from the front of the case. JetBrains Mono ExtraBold, sized to the
+  area at a stroke of at least 0.9 mm. Rail: `DRIVE_BAY.SCAD <SHA>` on one line, 1.16 mm
+  stroke. Carrier: file and SHA stacked, 1.5 mm. Blank: repo, path and SHA, 0.94 mm. The v1 tags were
+  Liberation Sans at 2.8–3.5 with ~0.5–0.65 mm stems: one bead per stroke, black on
+  black, unreadable. Render every part with
+  `scad/render.sh scad/glowbox-drive-bay/drive_bay.scad <out>.stl -D 'part="..."'`
+  (writes `<out>.stl` + `<out>.tag.stl`).
 
 ### Case fit
 - **Mounting (measured 2026-10-28, `P_20261028_005920` and `_005954`):** each of the
@@ -287,7 +294,9 @@ spare drive.
 - Counterbores 7.5 → 8.6.
 - Slice is 60 deep, so it includes the measured front row.
 - Rail tag: the v0 engraved text was unreadable. It now sits in a 1 mm pocket between the
-  screw holes, raised 0.8 from the pocket floor (top 0.2 below the face).
+  screw holes, raised 0.8 from the pocket floor (top 0.2 below the face). That v1 text
+  was unreadable too (too thin; see Provenance tags). v2 drops the pocket: the tag is
+  inlaid flush, and the rail prints outer face down.
 
 ## Photos
 
