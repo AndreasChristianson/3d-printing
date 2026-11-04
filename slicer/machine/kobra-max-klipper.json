@@ -1,11 +1,22 @@
 {
+	"bed_exclude_area": [
+		"0x302",
+		"39x302",
+		"39x317",
+		"84x317",
+		"84x393",
+		"76x393",
+		"76x415",
+		"0x415"
+	],
 	"change_filament_gcode": "T[next_extruder]; PURGE_LENGTH=[flush_length]\n{if flush_length > 0}\nM83\nG1 E-5 F2100 ; cancel Orca's 5 mm toolchange unretract: that retract was before the cut, and AFC_KICK_REFILL already primed (stays retracted for the travel)\n{endif}\n; FLUSH_START\n; EXTERNAL_PURGE {flush_length}\n; FLUSH_END",
 	"extra_loading_move": "0",
-	"from": "User",
-	"inherits": "MyKlipper 0.4 nozzle",
 	"extruder_clearance_height_to_lid": "270",
 	"extruder_clearance_height_to_rod": "32",
 	"extruder_clearance_radius": "54",
+	"from": "User",
+	"host_type": "moonraker",
+	"inherits": "MyKlipper 0.4 nozzle",
 	"machine_end_gcode": "G91 ;Relative positioning\nG0 E-1 Z0.2 F2400 ;Retract and raise Z\nG0 X5 Y5 F3000 ;Wipe out\nG0 Z5 ;Raise Z more\n\nG90 ;Absolute positioning\nG0 X0 Y{print_bed_max[1]} ;pull back\n_CLIENT_LINEAR_MOVE E=-10 F=180; retract\nM106 S0 ;Turn-off fan\nM104 S0 ;Turn-off hotend\nM140 S0 ;Turn-off bed\n\nM84",
 	"machine_load_filament_time": "60",
 	"machine_max_acceleration_e": [
@@ -47,17 +58,8 @@
 		"0x105",
 		"7x105"
 	],
-	"bed_exclude_area": [
-		"0x302",
-		"39x302",
-		"39x317",
-		"84x317",
-		"84x393",
-		"76x393",
-		"76x415",
-		"0x415"
-	],
 	"printable_height": "270",
+	"printer_agent": "moonraker",
 	"printer_extruder_id": [
 		"1"
 	],
