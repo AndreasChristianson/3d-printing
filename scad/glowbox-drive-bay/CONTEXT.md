@@ -153,8 +153,9 @@ through the two side bays.
 
 ### Files
 - **`hdd35.scad`:** reference model of the drive.
-  - Side holes at the SFF-8300 positions: 28.5 and 130.1 mm from the front end,
-    6.35 mm above the base.
+  - Side holes at the SFF-8300 positions: 16.9 and 118.5 mm from the front end
+    (SFF's 28.5 / 130.1 are from the connector end; v1 had them from the front,
+    so the drive stuck out the back), 6.35 mm above the base.
   - Only the outer pair is used. WD's white paper says the middle side hole is
     missing on some high-capacity drives.
   - **Check the hole positions with calipers on a spare drive.**
@@ -190,9 +191,8 @@ through the two side bays.
     groove wall, 16 mm in from the front.
   - **Reversible carrier:** the grooves run all the way through, so one carrier fits
     both bays, turned 180° (front ↔ back) for the other side. It has a tab pocket at
-    each end. There are detent notches at
-    both ends, so the bump gives one extra click as it passes the far notch on the
-    way in.
+    each end. (v1 had detent notches and bumps at both ends; v2 keeps the front
+    pair only.)
 - **STLs are in print orientation:** carrier and slice front face down, rails
   drive face down, so the counterbores open upward instead of bridging their
   screw-head seats. (Briefly outer face down for an inlaid tag on 2026-11-02;
@@ -298,6 +298,14 @@ spare drive.
 - Rail tag: the v0 engraved text was unreadable. It now sits in a 1 mm pocket between the
   screw holes, raised 0.8 from the pocket floor (top 0.2 below the face). That v1 text
   was unreadable too (too thin; see Provenance tags). v2 is in the same pocket.
+
+**v1 rail test fit (2026-11-03) → v2**
+- Rails a little tight at the detent bumps: bump 1.0 → 0.9 proud.
+- The rear pair of bumps dragged the whole way in: removed, with their beam slots
+  and the carrier's rear notches. Two bumps per rail, front end only.
+- The drive stuck out the back of the rail: the side holes were SFF's
+  connector-end numbers used from the front. Now 16.9 / 118.5 from the front
+  (11.6 mm forward), so the drive lines up with the rail.
 
 ## Photos
 

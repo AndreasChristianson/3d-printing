@@ -116,15 +116,16 @@ screw_clear_d = 3.8;
 cbore_d       = 8.6;  // pan head; some drive screws' heads are 7.8
 under_head    = 2.0;
 
-// Detent: four bumps per rail, each on a flexing beam at a rail edge (both
-// edges, front and rear), clicking into the four notches in the groove
-// walls, so the drive can't creep and the rail centres itself.
+// Detent: two bumps per rail, each on a flexing beam at a rail edge (both
+// edges, front end only), clicking into the two notches in the groove
+// walls, so the drive can't creep and the rail centres itself. (v1 also had
+// a pair at the rear end; they dragged the whole way in, so they're gone.)
 det_y    = 16;      // from the drive front (a notch at each end)
 det_len  = 30;      // beam length
 det_beam = 2.0;     // beam width
 det_slot = 1.2;
 det_r    = 1.5;
-det_bump = 1.0;     // how far the bump stands proud of the rail edge
+det_bump = 0.9;     // how far the bump stands proud of the rail edge (v1 1.0: tight)
 
 slice_d = 60;       // reaches past the measured front mount row (52.4)
 
@@ -189,8 +190,6 @@ mount_y = [mount_y_front, car_d - mount_y_back];
 mount_x = [for (d = concat(mount_x_edge, [for (o = mount_x_other) car_w - o]))
            car_w / 2 - d];
 rail_tag_l = hdd_side_hole_y[1] - hdd_side_hole_y[0] - cbore_d - 2;
-// rear detent: the bump that lands in the carrier's rear notch
-det_y_rear = car_d - 2 * pocket_d - det_y;
 drive_x = [for (i = [0 : n_drives - 1]) (i - (n_drives - 1) / 2) * pitch];
 // Side holes sit 6.35 above the drive base; the base faces +X.
 hole_x  = hdd_h / 2 - hdd_side_hole_z;
@@ -211,7 +210,7 @@ assert(hole_x + cbore_d / 2 < rail_w / 2 - det_beam - det_slot - 1,
    drive front, the tab is at negative Y, the leading end is at hdd_l), Z=0 the outer (groove) face,
    Z=rail_t the face against the drive. It is symmetric across X (screw
    holes and detents on both edges), so the top and bottom rails are the
-   same part, and either way round fits the drive's holes. */
+   same part. */
 module rail() with_provenance() {
     rail_body();
     // raised from the pocket floor; it runs along the rail and reads from
@@ -240,16 +239,16 @@ module rail_body() {
             translate([0, 0, -1]) cylinder(d = cbore_d, h = 1 + rail_t - under_head);
         }
         // slots that free the detent beams
-        for (s = [-1, 1], y = [det_y, det_y_rear])
-            translate([s * (rail_w / 2 - det_beam - det_slot / 2), y, rail_t / 2])
+        for (s = [-1, 1])
+            translate([s * (rail_w / 2 - det_beam - det_slot / 2), det_y, rail_t / 2])
                 cube([det_slot, det_len, rail_t + 2], center = true);
         // pocket for the provenance tag, between the counterbores
         translate([-rail_tag_w / 2, hdd_side_hole_y[0] + cbore_d / 2 + 1, -1])
             cube([rail_tag_w, rail_tag_l, 1 + rail_tag_pocket]);
     }
     // detent bumps on the beams' outer edges
-    for (s = [-1, 1], y = [det_y, det_y_rear])
-        translate([s * (rail_w / 2 + det_bump - det_r), y, 0])
+    for (s = [-1, 1])
+        translate([s * (rail_w / 2 + det_bump - det_r), det_y, 0])
             cylinder(r = det_r, h = rail_t);
 }
 
@@ -412,10 +411,10 @@ module carrier_body() {
             pw = rail_w + 2 * tab_shoulder + 1;
             for (y = [-1, car_d - pocket_d])
                 translate([x - pw / 2, y, z0]) cube([pw, pocket_d + 1, groove_d + 0.01]);
-            // detent notches: both groove walls, both ends, one for each of
-            // the rail's four bumps
-            for (sx = [-1, 1], y = [pocket_d + det_y, pocket_d + det_y_rear])
-                translate([x + sx * (rail_w / 2 + det_bump - det_r), y, z0 - 0.5])
+            // detent notches: both groove walls, front end, one for each of
+            // the rail's two bumps
+            for (sx = [-1, 1])
+                translate([x + sx * (rail_w / 2 + det_bump - det_r), pocket_d + det_y, z0 - 0.5])
                     cylinder(r = det_r + 0.3, h = groove_d + 1);
         }
         // M3 heat-sets in the top face, under the case's pad holes

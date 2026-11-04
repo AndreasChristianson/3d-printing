@@ -11,8 +11,8 @@
 // X=hdd_w). Only the outer pair is used: Western Digital's 2018 white paper
 // "3.5-inch Form Factor Mounting Screw Locations and Depths" says the middle
 // hole is legacy and missing on some high-capacity drives. Positions are the
-// SFF-8300 values; CONFIRM with calipers on a real drive before relying on the
-// rail fit.
+// SFF-8300 values. SFF gives them from the CONNECTOR end (28.5 and 130.1);
+// v1 had them from the front, and the test-fit drive stuck out the back.
 //
 // Preview:  openscad -o hdd_iso.png --render --imgsize=1000,800 \
 //             --colorscheme=Tomorrow hdd35.scad
@@ -23,8 +23,8 @@ $fn = 32;
 hdd_l = 147.0;           // max length
 hdd_w = 101.6;
 hdd_h = 26.1;            // max height
-hdd_side_hole_y  = [28.5, 130.1];  // from the front end; 101.6 apart
-hdd_side_hole_y_legacy = 70.1;     // middle hole, not on every drive
+hdd_side_hole_y  = [16.9, 118.5];  // from the front end; 101.6 apart
+hdd_side_hole_y_legacy = 76.9;     // middle hole, not on every drive
 hdd_side_hole_z  = 6.35; // above the base
 hdd_tap_d        = 3.5;  // 6-32 UNC major diameter (modelled as a plain hole)
 hdd_tap_depth    = 3.0;  // SFF-8300 only guarantees 3.02 mm screw penetration
