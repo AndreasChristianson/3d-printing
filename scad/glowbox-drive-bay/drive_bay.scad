@@ -411,10 +411,11 @@ module carrier_body() {
             pw = rail_w + 2 * tab_shoulder + 1;
             for (y = [-1, car_d - pocket_d])
                 translate([x - pw / 2, y, z0]) cube([pw, pocket_d + 1, groove_d + 0.01]);
-            // detent notches: both groove walls, front end, one for each of
-            // the rail's two bumps
-            for (sx = [-1, 1])
-                translate([x + sx * (rail_w / 2 + det_bump - det_r), pocket_d + det_y, z0 - 0.5])
+            // detent notches: both groove walls, one for each of the rail's
+            // two bumps, at both ends so the carrier can go in either way
+            // round (skirt at the front or the back)
+            for (sx = [-1, 1], y = [pocket_d + det_y, car_d - pocket_d - det_y])
+                translate([x + sx * (rail_w / 2 + det_bump - det_r), y, z0 - 0.5])
                     cylinder(r = det_r + 0.3, h = groove_d + 1);
         }
         // M3 heat-sets in the top face, under the case's pad holes
