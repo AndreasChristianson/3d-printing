@@ -191,8 +191,8 @@ through the two side bays.
     groove wall, 16 mm in from the front.
   - **Reversible carrier:** the grooves run all the way through, so one carrier fits
     both bays, turned 180° (front ↔ back) for the other side. It has a tab pocket at
-    each end, and detent notches at both ends (so the carrier can also go in with
-    the skirt at the back). The rails have bumps at the front end only.
+    each end. (v1 had detent notches and bumps at both ends; v2 keeps the front
+    pair only.)
 - **STLs are in print orientation:** carrier and slice front face down, rails
   drive face down, so the counterbores open upward instead of bridging their
   screw-head seats. (Briefly outer face down for an inlaid tag on 2026-11-02;
@@ -302,8 +302,7 @@ spare drive.
 **v1 rail test fit (2026-11-03) → v2**
 - Rails a little tight at the detent bumps: bump 1.0 → 0.9 proud.
 - The rear pair of bumps dragged the whole way in: removed, with their beam slots
-  Two bumps per rail, front end only. The carrier keeps its rear notches, for
-  when it is installed the other way round (skirt / air blocker at the back).
+  and the carrier's rear notches. Two bumps per rail, front end only.
 - The drive stuck out the back of the rail: the side holes were SFF's
   connector-end numbers used from the front. Now 16.9 / 118.5 from the front
   (11.6 mm forward), so the drive lines up with the rail.
