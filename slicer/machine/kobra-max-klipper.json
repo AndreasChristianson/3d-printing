@@ -41,8 +41,8 @@
 	"print_host": "http://klipper2",
 	"printable_area": [
 		"7x0",
-		"371x0",
-		"371x415",
+		"375x0",
+		"375x415",
 		"0x415",
 		"0x105",
 		"7x105"
