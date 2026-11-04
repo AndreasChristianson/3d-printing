@@ -308,7 +308,8 @@ spare drive.
   (11.6 mm forward), so the drive lines up with the rail.
 - Mount holes (left bay): the front row lines up; the rear row was ~2.5 mm too
   far forward (`P_20261103_2010*`). Rear row 23.3 → 20.8 from the carrier back
-  (79.8 between rows). Right bay fit still to check.
+  (79.8 between rows). The right bay showed the same ~2.5 mm, so the 11-01 marks
+  were off and one rear row still fits both bays.
 
 ## Photos
 
