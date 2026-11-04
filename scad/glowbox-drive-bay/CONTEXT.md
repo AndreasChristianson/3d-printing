@@ -306,6 +306,9 @@ spare drive.
 - The drive stuck out the back of the rail: the side holes were SFF's
   connector-end numbers used from the front. Now 16.9 / 118.5 from the front
   (11.6 mm forward), so the drive lines up with the rail.
+- Mount holes (left bay): the front row lines up; the rear row was ~2.5 mm too
+  far forward (`P_20261103_2010*`). Rear row 23.3 → 20.8 from the carrier back
+  (79.8 between rows). Right bay fit still to check.
 
 ## Photos
 
@@ -315,3 +318,4 @@ spare drive.
 - `P_20261028_0117*`: the hinged front door
 - `P_20261101_*`, `P_20261102_000255`: v0 test fit: hole marks, caliper readings, a screw head
 - `P_20261102_002022`: the case's top plate from above, both bays' mount pads
+- `P_20261103_2010*`: v1 carrier in the left bay: rear-row insert offset from the case hole

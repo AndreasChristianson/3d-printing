@@ -69,7 +69,9 @@ bay_h = 149.7;      // side bay front opening, height
    v0's. All numbers below are mark centres on the v0 carrier, which was
    128.8 wide x 153 deep, as installed in the test bay. */
 mount_y_front = 52.4;  // carrier front face -> front row
-mount_y_back  = 23.3;  // carrier back face -> rear row
+// v1 test fit (2026-11-03, left bay): the front row lined up; the rear row
+// was ~2.5 too far forward (P_20261103_2010*), so 23.3 -> 20.8.
+mount_y_back  = 20.8;  // carrier back face -> rear row
 // The test fit was in the RIGHT bay (seen from the front).
 // From the carrier's +X edge as test-fitted: the hole of each end pad
 // nearer that edge, and the pads' other holes. The middle pad (~66 and
