@@ -43,9 +43,10 @@ Printer configs can contain credentials. When importing:
 
 ## SCAD parts: provenance tags
 
-Functional parts that have room for it carry a provenance tag: the `.scad` file name and
-the git SHA it was rendered from, plus the repo path and the repo when there's room. That
-way a part found years later can be traced back to its pattern.
+Functional parts that have room for it carry a provenance tag: the `.scad` file name
+(shown without the `.scad`) and the git SHA it was rendered from, plus the repo path and
+the repo when there's room. That way a part found years later can be traced back to its
+pattern.
 
 - `include <../lib/provenance.scad>` and wrap the part:
   `with_provenance() { part(); translate(...) provenance(w = ..., h = ...); }`.
