@@ -1,6 +1,6 @@
 // provenance.scad
 // Provenance tag for functional parts: the .scad file and the git commit it
-// was rendered from, so a printed part can be traced back to its pattern
+// was rendered from (the tag drops the ".scad": every tagged file is one), so a printed part can be traced back to its pattern
 // years later. When there's room, the tag also gets the repo-relative path
 // and then the repo.
 //
@@ -69,6 +69,12 @@ function prov_metrics(font) =
 
 function prov_upcase(s) = chr([for (c = s) let (o = ord(c)) o >= 97 && o <= 122 ? o - 32 : o]);
 
+// p without a trailing ".scad"
+function prov_noext(p) =
+    let (n = len(p))
+    n > 5 && chr([for (i = [n - 5 : n - 1]) ord(p[i])]) == ".scad"
+        ? chr([for (i = [0 : n - 6]) ord(p[i])]) : p;
+
 function prov_basename(p) =
     let (slashes = search("/", p, 0)[0])
     len(slashes) == 0 ? p : chr([for (i = [max(slashes) + 1 : len(p) - 1]) ord(p[i])]);
@@ -86,7 +92,8 @@ function prov_fit(lines, w, h, m) =
 // or undef. Each field set is tried stacked and on one line.
 function prov_layout(w, h, m) =
     let (sha  = prov_upcase(git_sha),
-         sets = [[prov_repo, scad_path, sha], [scad_path, sha], [prov_basename(scad_path), sha]],
+         path = prov_noext(scad_path),
+         sets = [[prov_repo, path, sha], [path, sha], [prov_basename(path), sha]],
          fits = [for (f = sets)
                      let (one = [len(f) == 2 ? str(f[0], " ", f[1]) : str(f[0], " ", f[1], " ", f[2])],
                           s_stack = prov_fit(f, w, h, m),
@@ -102,7 +109,7 @@ module provenance(w, h, mode = prov_mode, depth = prov_depth, font = prov_font,
     layout = let (l = prov_layout(w, h, m))
         assert(!is_undef(l),
                str("provenance: ", w, " x ", h, " mm is too small for \"",
-                   prov_basename(scad_path), " ", prov_upcase(git_sha), "\" at a ",
+                   prov_basename(prov_noext(scad_path)), " ", prov_upcase(git_sha), "\" at a ",
                    prov_min_stroke, " mm stroke in ", font))
         l;
     lines = layout[0];
