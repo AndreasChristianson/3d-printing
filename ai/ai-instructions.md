@@ -51,9 +51,11 @@ pattern.
 - `include <../lib/provenance.scad>` and wrap the part:
   `with_provenance() { part(); translate(...) provenance(w = ..., h = ...); }`.
   `provenance()` fits the text to the w × h area and **stops the render** if file + SHA
-  can't reach `prov_min_stroke` (0.9 mm, about 2 extrusion lines). Text with thinner
-  strokes prints as one wiggly bead (glowbox v0/v1 tags, 2026-11). The path, and then
-  the repo, go on only if the text still reaches `prov_extra_stroke` (1.2 mm).
+  can't reach `prov_min_stroke` (3 extrusion lines, 1.35 mm). Text with thinner
+  strokes prints lumpy or as one wiggly bead (glowbox v0/v1 tags, 2026-11). The path,
+  and then the repo, go on only if the text still reaches `prov_extra_stroke` (4 lines,
+  1.8 mm). A part with one pattern in the repo can set `prov_fields = "sha"` after the
+  include to tag the SHA alone (`scad/cable-chain/chain_link.scad`).
 - Prefer `inlay`: flush in a flat face that prints down on the bed. The first layers
   give the crispest text. `emboss` (the lib default) is raised on a face that prints
   facing up. Where that face must stay flush, raise the text from a shallow pocket
