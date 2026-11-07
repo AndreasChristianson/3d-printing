@@ -41,13 +41,13 @@ prov_fields = "sha";   // one chain pattern: the SHA alone reads best
 part      = "print";
 chain     = "z";     // "z" | "x": the size preset
 open_side = chain == "x" ? "inner" : "outer";
-check_a   = max_bend; // bend for part = "check"
 
 pitch    = chain == "x" ? 32 : 34;     // pin to pin
 height   = chain == "x" ? 22 : 28.6;   // outside, z
 inner_w  = 33;     // clear width between the inner plates
 t        = 3;      // one plate layer; a side plate is 2 layers
 max_bend = chain == "x" ? 60 : 55;     // deg per link
+check_a   = max_bend; // bend for part = "check"
 flat_stop = 2;     // deg: the straightest it goes (180 - 2 = 178 deg)
 gap      = 0.4;    // running clearance between neighbors
 

@@ -16,6 +16,12 @@
 //                    bracket, 2x M3 in line along the chain, 12 mm apart
 //                    (the old 100% "Fixed end 2 holes", printed at 150%).
 //                    Hole end.
+//     | "z_base"     Z chain, fixed end: the same plate as x_bottom, on top
+//                    of the bottom 4040, centred, 4x M3 into T-nuts (20 mm
+//                    across the rail = its two slots, 38.6 along it). Pin end.
+//     | "z_top"      Z chain, moving end: the old "z cable chain top mount"
+//                    (on the X gantry), same face, foot and 2x M3. Hole end.
+//                    z_top_foot says which side of the bend its foot is on.
 // part = "end" (as printed) | "in_place" (link frame) | "end_check" (overlap
 //      with the neighbor link at bend check_a: renders empty when clear)
 //      | "end_asm" (the end and its neighbor at check_a). Not "check" or
@@ -30,6 +36,7 @@ end   = "x_bottom";
 include <chain_link.scad>
 part  = "end";
 chain = end == "x_bottom" || end == "x_toolhead" ? "x" : "z";
+z_top_foot = "inside";   // "inside" | "outside": the foot's side of the bend
 
 m3_d     = 3.4;    // M3 clearance
 m3_head  = 6.0;    // counterbore for an M3 socket head
@@ -52,9 +59,11 @@ module link_plates(x0, x1) {
 // (X), z = 0 when it opens on the outside (Z).
 fixed_z0 = open_bottom ? height - bar_t : 0;
 
-// ---------- X chain, fixed end (pin end) ----------
+// ---------- fixed ends: X on the gantry, Z on the 4040 (pin ends) ----------
 
-xb_face  = 16.4;   // pivot to the mounting face, as on the old part
+// pivot to the mounting face: 16.4 as on the old X part. The Z link's next
+// neighbor sweeps in to pitch - 11.9 at full bend, so the Z plate sits back.
+xb_face  = chain == "x" ? 16.4 : 19;
 xb_t     = 5;      // plate thickness
 xb_h     = 48.6;   // plate height (z), as on the old part
 xb_holes = [20, 38.6];   // hole spacing [y, z], centred on the chain
@@ -121,25 +130,59 @@ module x_toolhead() {
 // As printed: floor on the bed.
 module x_toolhead_print() { x_toolhead(); }
 
+// ---------- Z chain, gantry end (hole end) ----------
+
+// The old part, in this frame (pivot at x = 0, z = h; it's the same size
+// link): a block from zt_x0 to the mounting face at zt_face, the link's full
+// height plus a foot below it to z = -20, with a cable window through it
+// along the chain. 2x M3 through the foot, parallel to the chain, at
+// z = -15, counterbored on the chain side.
+zt_x0    = 14.3;
+zt_face  = 23.8;
+zt_foot  = -20;
+zt_holes = [[10.1, -15], [-12.0, -15]];   // [y from the chain's centre, z]
+zt_win_h = 18.2;   // window height (z), centred on the pivot
+
+module z_top() {
+    // the link half: flipped about the pivot height when the foot is on the
+    // outside of the bend (the mount stays put)
+    flip_z(z_top_foot == "outside") link_plates(-nose_r - 1, zt_face);
+    difference() {
+        hull() {
+            translate([zt_x0, edge_c, zt_foot]) cube([zt_face - zt_x0, width - 2 * edge_c, height - zt_foot]);
+            translate([zt_x0, 0, zt_foot + edge_c]) cube([zt_face - zt_x0, width, height - zt_foot - 2 * edge_c]);
+        }
+        translate([zt_x0 - 1, 2 * t, h - zt_win_h / 2]) cube([zt_face - zt_x0 + 2, inner_w, zt_win_h]);
+        for (p = zt_holes) translate([0, width / 2 + p[0], p[1]]) rotate([0, 90, 0]) {
+            translate([0, 0, zt_x0 - 1]) cylinder(d = m3_d, h = zt_face - zt_x0 + 2, $fn = 32);
+            translate([0, 0, zt_x0 - 1]) cylinder(d = m3_head, h = 1 + m3_head_h, $fn = 48);
+        }
+    }
+}
+// As printed: mounting face on the bed.
+module z_top_print() { rotate([0, 90, 0]) translate([-zt_face, 0, 0]) z_top(); }
+
 // ---------- dispatch ----------
 
 module end_in_place() {
-    if (end == "x_bottom") x_bottom();
+    if (end == "x_bottom" || end == "z_base") x_bottom();
     else if (end == "x_toolhead") x_toolhead();
+    else if (end == "z_top") z_top();
 }
-end_is_pin = end == "x_bottom";
+end_is_pin = end == "x_bottom" || end == "z_base";
 
 // The neighbor link (with its bar) at bend a, in the end's frame.
 module neighbor(a) {
     if (end_is_pin)
         translate([pitch, 0, h]) rotate([0, a, 0]) translate([0, 0, -h]) { link(); bar(); }
-    else
+    else flip_z(end == "z_top" && z_top_foot == "outside")
         translate([0, 0, h]) rotate([0, -a, 0]) translate([-pitch, 0, -h]) { link(); bar(); }
 }
 
 if (part == "end") {
-    if (end == "x_bottom") x_bottom_print();
+    if (end == "x_bottom" || end == "z_base") x_bottom_print();
     else if (end == "x_toolhead") x_toolhead_print();
+    else if (end == "z_top") z_top_print();
 }
 else if (part == "in_place") end_in_place();
 else if (part == "end_check") intersection() { end_in_place(); neighbor(check_a); }
