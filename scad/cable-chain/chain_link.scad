@@ -48,7 +48,7 @@ inner_w  = 33;     // clear width between the inner plates
 t        = 3;      // one plate layer; a side plate is 2 layers
 max_bend = chain == "x" ? 60 : 55;     // deg per link
 check_a   = max_bend; // bend for part = "check"
-flat_stop = 2;     // deg: the straightest it goes (180 - 2 = 178 deg)
+flat_stop = 1.25;  // deg: the straightest it goes (178.75 deg; 2 sagged)
 gap      = 0.4;    // running clearance between neighbors
 
 pin_d    = 10;
@@ -101,9 +101,11 @@ snap_x1  = floor(pitch - height / 2 * sin(max_bend) - gap - 0.4);
 barb_d   = 1.0;    // barb reach: 1.0 - fit = 0.85 into the pocket
 pocket_d = 1.2;    // barb pocket depth past the leg recess (the recess +
                    //   pocket is 2.55 of the outer layer's 3 mm)
-barb_h   = 2.4;    // barb height
-barb_c   = 0.6;    // rise of the barb's catch slope (31 deg: pry-able)
-snap_preload = 0.15; // barb top above the pocket top, seated
+barb_h   = 2.8;    // barb height: leaves a 1 mm flat tip, not a point
+barb_c   = 0.8;    // rise of the barb's catch slope: 39 deg off flat, so
+                   //   it pries, and the pocket's matching ceiling prints
+                   //   as a 51 deg overhang instead of a sagging bridge
+snap_preload = 0.1; // barb slope above the pocket's ceiling slope, seated
 pry_gap  = 2;      // the recess and pocket run on past the leg tip: a small
                    //   screwdriver goes in there and wedges on the barb's
                    //   45 deg lead-in, springing the leg out
@@ -263,10 +265,17 @@ module bar_cuts_top() {
         translate([bar_x0 - fit, leg_t + fit - 0.01, zs + 0.01]) rotate([90, 0, 90])
             linear_extrude(snap_x1 - bar_x0 + 2 * fit)
                 polygon([[0, 0], [gusset + 2 * fit, 0], [0, -gusset - 2 * fit]]);
-        // pocket: the barb's catch slope bears on its top edge
-        translate([bar_x0 - fit, leg_t + fit - 0.01, leg_zb - pry_gap])
-            cube([snap_x1 - bar_x0 + 2 * fit, pocket_d + 0.01,
-                  pry_gap + barb_h - snap_preload]);
+        // pocket: barb-shaped, its ceiling the barb's catch slope dropped
+        // by snap_preload, so the two bear face to face. (A square ceiling
+        // printed as a 1.2 mm bridge that sagged onto the barb, and the
+        // barb's slope rode on its corner: the barbs stopped short.)
+        ctop = function(y) leg_zb + barb_h - snap_preload - barb_c / barb_d * (y - leg_t);
+        y0 = leg_t + fit - 0.01;
+        y1 = leg_t + fit + pocket_d;
+        translate([bar_x0 - fit, 0, 0]) rotate([90, 0, 90])
+            linear_extrude(snap_x1 - bar_x0 + 2 * fit)
+                polygon([[y0, leg_zb - pry_gap], [y1, leg_zb - pry_gap],
+                         [y1, ctop(y1)], [y0, ctop(y0)]]);
     }
 }
 
