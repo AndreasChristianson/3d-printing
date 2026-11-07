@@ -1,10 +1,14 @@
 // chain_link.scad
 // Openable cable-chain link for the Kobra Max X gantry and Z chains.
 //
-// Replaces the "Chain link 55 degree angle" link printed at 200%. It keeps
-// that chain's 34 mm pitch, 28.6 mm height and 55 deg max bend per link (so
-// the bend radius and the end heights stay the same), and widens it from
-// 34 to 45 mm outside, 22 -> 33 mm clear inside. Straight, it stops 2 deg
+// Replaces the "Chain link 55 degree angle" link, printed at 200% for the
+// Z chain and 150% for the X chain. Both new chains are 45 mm wide outside,
+// 33 mm clear inside. The size comes from `chain`:
+//   "z": the old 200% link's 34 mm pitch, 28.6 mm height and 55 deg max bend
+//        (same bend radius and end heights), so 20.6 mm clear inside.
+//   "x": 28 mm pitch, 22 mm tall, 60 deg: folds 180 deg in ~78 mm outside,
+//        like the old 150% X chain (76.7), with 14 mm clear inside.
+// Straight, it stops 2 deg
 // short of flat (178 deg), bowed toward the inside of the bend, so the
 // plastic's give lets a self-supporting run settle flat instead of sagging.
 //
@@ -35,14 +39,15 @@ include <../lib/provenance.scad>
 prov_fields = "sha";   // one chain pattern: the SHA alone reads best
 
 part      = "print";
-open_side = "inner";   // "inner" (X chain) | "outer" (Z chain)
-check_a   = 55;      // bend for part = "check"
+chain     = "z";     // "z" | "x": the size preset
+open_side = chain == "x" ? "inner" : "outer";
+check_a   = max_bend; // bend for part = "check"
 
-pitch    = 34;     // pin to pin
-height   = 28.6;   // outside, z
+pitch    = chain == "x" ? 32 : 34;     // pin to pin
+height   = chain == "x" ? 22 : 28.6;   // outside, z
 inner_w  = 33;     // clear width between the inner plates
 t        = 3;      // one plate layer; a side plate is 2 layers
-max_bend = 55;     // deg per link
+max_bend = chain == "x" ? 60 : 55;     // deg per link
 flat_stop = 2;     // deg: the straightest it goes (180 - 2 = 178 deg)
 gap      = 0.4;    // running clearance between neighbors
 
@@ -59,8 +64,12 @@ bar_t    = 4;      // crossbar thickness (z)
 bar_c    = 1;      // 45 deg chamfer on the bars' channel-side edges across
                    //   the chain, so pulled wires don't drag on a corner
 edge_c   = 1;      // 45 deg chamfer on the link's four outside long edges
-bar_x0   = 10;     // crossbar span along x: mid-link, where both plate
-bar_x1   = 24;     //   layers are solid, clear of the pin and the hole
+bar_x0   = 10;     // snap-in bar's start, clear of the pivot hole
+fix_x0   = chain == "x" ? 7 : 10;   // fixed crossbar span along x:
+fix_x1   = chain == "x" ? 21 : 24;  //   mid-link, where the inner layer is
+                   //   solid, clear of the pin and the hole (it's trimmed
+                   //   to the inner layer's profile anyway). 14 mm long so
+                   //   the tag fits.
 gusset   = 2;      // 45 deg fill: under the fixed bar where it meets the
                    //   inner plates, and at the snap-in bar's leg roots
 
@@ -82,9 +91,10 @@ ear_t    = 2;      // bar plate thickness = seat depth
 fit      = 0.15;   // bar-to-link clearance, each side
 leg_l    = 16;     // leg below the bar plate (long = low strain)
 leg_t    = 1.2;    // leg thickness (y): its flex
-snap_x1  = 21;     // the snap-in bar and its legs run bar_x0..snap_x1: at
-                   //   full bend the next link's outer layer sweeps in to
-                   //   x = 21.9 (z ~6), in the same y band as the legs
+// The snap-in bar and its legs run bar_x0..snap_x1. At full bend the next
+// link's outer layer, in the same y band as the legs, sweeps in to
+// pitch - h sin(max_bend) - gap: x = 21.9 for "z", 18.1 for "x".
+snap_x1  = floor(pitch - height / 2 * sin(max_bend) - gap - 0.4);
 barb_d   = 1.0;    // barb reach: 1.0 - fit = 0.85 into the pocket
 pocket_d = 1.2;    // barb pocket depth past the leg recess (the recess +
                    //   pocket is 2.55 of the outer layer's 3 mm)
@@ -211,9 +221,9 @@ module bar_gussets() {
         both_sides() translate([0, 2 * t, zb]) rotate([90, 0, 90])
             linear_extrude(pitch) polygon([[-0.01, 0.01], [gusset, 0.01], [-0.01, -gusset]]);
         hull() {
-            translate([bar_x0, 0, zb + bar_c - 0.01]) cube([bar_x1 - bar_x0, width, 0.01]);
-            translate([bar_x0 + bar_c + gusset, 0, zb - gusset])
-                cube([bar_x1 - bar_x0 - 2 * (bar_c + gusset), width, 0.01]);
+            translate([fix_x0, 0, zb + bar_c - 0.01]) cube([fix_x1 - fix_x0, width, 0.01]);
+            translate([fix_x0 + bar_c + gusset, 0, zb - gusset])
+                cube([fix_x1 - fix_x0 - 2 * (bar_c + gusset), width, 0.01]);
         }
     }
 }
@@ -225,7 +235,7 @@ module fixed_bar(bottom) {
     intersection() {
         slab(t, width - t) inner_profile();
         flip_z(bottom) {
-            bar_box(bar_x0, bar_x1 - bar_x0, t, width - 2 * t);
+            bar_box(fix_x0, fix_x1 - fix_x0, t, width - 2 * t);
             bar_gussets();
         }
     }
@@ -315,12 +325,12 @@ module bar_print() {
 module link_tagged() with_provenance() {
     link();
     tag_w = width - 2 * edge_c - 2;
-    tag_h = bar_x1 - bar_x0 - 2;
+    tag_h = fix_x1 - fix_x0 - 2;
     if (open_bottom)    // fixed bar on top: the top face prints down
-        translate([(bar_x0 + bar_x1) / 2, width / 2, height]) rotate([0, 0, 90])
+        translate([(fix_x0 + fix_x1) / 2, width / 2, height]) rotate([0, 0, 90])
             provenance(w = tag_w, h = tag_h, mode = "inlay");
     else                // fixed bar on the bottom
-        translate([(bar_x0 + bar_x1) / 2, width / 2, 0]) rotate([0, 180, 0]) rotate([0, 0, 90])
+        translate([(fix_x0 + fix_x1) / 2, width / 2, 0]) rotate([0, 180, 0]) rotate([0, 0, 90])
             provenance(w = tag_w, h = tag_h, mode = "inlay");
 }
 // The link as printed: removable side up, so the fixed bar (and the tag)
