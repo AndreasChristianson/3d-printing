@@ -9,11 +9,11 @@
 //   HeaterCore sock.
 // - Lid on a 1.75 filament pin hinge at the back, held shut by a rubber
 //   band at the front (a printed snap arm would flex across its layer lines).
-//   The band's top end sits in a pocket in a tab on the lid top; it runs
-//   down the front in a shallow channel, under the bottom edge, and into
-//   one of three pockets on the underside: pick the one that gives the band
-//   a firm stretch. Every band feature is a recess in a face that prints on
-//   the bed, so nothing needs supports.
+//   The band loops between two buttons on the front: one flush with the lid
+//   top, one flush with the base bottom. Each is a short post with a cap; the
+//   band sits on the post, 2 below the cap's edge, and the cap and wall keep
+//   it from sliding off. Both buttons start on the bed as printed and the
+//   posts bridge 3 mm wall-to-cap, so nothing needs supports.
 //   Rings under the lid press on the cuffs (not the tips) so nozzles stay put
 //   upside down.
 //
@@ -26,7 +26,7 @@
 // The base's .tag.stl is the bottom provenance inlay plus the "HF" label:
 // give it a contrasting filament. Print the base upright, the lid upside
 // down (top on the bed). Pin: a ~70 mm length of 1.75 filament.
-// Band: the render echoes the loop length each underside pocket gives.
+// Band: the render echoes the loop length it is stretched to.
 //
 // Preview: part = "assembly" (lid closed), "open", or "exploded".
 
@@ -101,32 +101,24 @@ base_knuckles = [[6, 22], [55, 71]];
 lid_knuckle   = [22 + hinge_gap, 55 - hinge_gap];
 
 /* ---------- Rubber band latch ---------- */
-// Centred between socket columns 2 and 3, so the underside pockets miss the
-// socket holes (the holes bottom out 1.6 above the bed).
-band_x      = (col_x[1] + col_x[2]) / 2;   // 41.5
-band_w      = 7;      // channel / pocket width (X): band width + slack
-chan_d      = 0.8;    // channel depth on the base front and underside
-tab_w       = 13;     // lid tab
-tab_out     = 3.0;    // how far it stands proud of the lid front
-lid_pocket  = [-0.6, 1.8];   // Y span of the pocket in the tab + lid wall
-lid_pocket_d = 2.0;
-lid_chan_d  = 0.6;    // channel over the tab's front edge to the pocket
-bot_pockets = [4, 11, 18];   // Y centres of the underside pockets
-bot_pocket_w = 2.6;   // (Y)
-bot_pocket_d = 2.4;
-// Loop circumference the band is stretched to, per underside pocket:
-// (lid pocket -> tab front -> down to the base edge -> pocket) x 2.
-function band_loop(py) =
-    2 * ((lid_pocket[0] + lid_pocket[1])/2 + tab_out
-         + norm([tab_out + chan_d, lid_top_z]) + py - chan_d);
-echo(str("band loop (mm) per underside pocket: ", [for (py = bot_pockets) round(band_loop(py))]));
+band_x      = body_x / 2;
+btn_seat    = 2.0;    // band seat (post top) below the lid top / above the base bottom
+post_w      = 5;      // post, X; the band strands run either side of it
+post_h      = 3;      // post, Z
+post_out    = 3;      // post length out from the wall (Y): room for 2 wraps
+cap_w       = 11;     // cap, X
+cap_t       = 1.6;    // cap, Y
+cap_h       = lid_top_z - z_rim;   // cap, Z: full lid height (5.6)
+// Loop circumference when on: two strands between the seats plus the wrap
+// over each post.
+band_loop = 2 * ((lid_top_z - btn_seat) - btn_seat) + 2 * post_w;
+echo(str("band loop (mm): ", round(band_loop)));
 
 assert(z_rim - lip_h > deck_z + 0.3, "lid lip hits the deck");
 assert(col_x[3] + cb_d/2 < body_x - lip_in - lip_t, "sockets reach the lid lip");
 assert(row_y[0] - cb_d/2 > lip_in + lip_t, "front row reaches the lid lip");
-assert(hinge_y + hinge_r + tab_out <= 70, "deeper than the bin");
-assert(band_x - band_w/2 > col_x[1] + hole_d/2 + 0.5 && band_x + band_w/2 < col_x[2] - hole_d/2 - 0.5,
-       "underside band pockets hit the socket holes");
+assert(hinge_y + hinge_r + post_out + cap_t <= 70, "deeper than the bin");
+assert(btn_seat + post_h < cap_h - 0.5, "post doesn't fit under the cap");
 
 /* ---------- Helpers ---------- */
 // x by y rounded rectangle, or the outline inset from it (corner radius
@@ -148,8 +140,8 @@ module base_body() {
         union() {
             linear_extrude(z_rim) rrect(body_x, body_y);
             for (k = base_knuckles) base_knuckle(k[0], k[1]);
+            band_button(btn_seat, up = false);
         }
-        base_band_cuts();
         // interior above the deck / well
         translate([0, 0, deck_z]) linear_extrude(z_rim) rrect(body_x, body_y, inset = wall);
         translate([wall, well_y0, well_z]) cube([body_x - 2*wall, well_y1 - well_y0, z_rim]);
@@ -191,17 +183,18 @@ function knuckle_profile(dir) =
                  [for (a = [-90 : 10 : 90]) [hinge_y + hinge_r*cos(a), hinge_z + hinge_r*sin(a)]],
                  [[hinge_y + hinge_r, lid_top_z]]);
 
-// Band channel down the front and under the base, with the pockets the
-// band's lower end seats in. The front-bottom edge is chamfered in the channel
-// so the band doesn't wrap a sharp corner.
-module base_band_cuts() {
-    x0 = band_x - band_w/2;
-    last = bot_pockets[len(bot_pockets) - 1] + bot_pocket_w/2;
-    translate([x0, -1, -1]) cube([band_w, chan_d + 1, z_rim + 2]);
-    translate([x0, -1, -1]) cube([band_w, last + 1, chan_d + 1]);
-    for (py = bot_pockets)
-        translate([x0, py - bot_pocket_w/2, -1]) cube([band_w, bot_pocket_w, bot_pocket_d + 1]);
-    translate([band_x, chan_d, chan_d]) rotate([45, 0, 0]) cube([band_w, 1.2, 1.2], center = true);
+// Band button on the front wall. The band seats on the post face at z_seat
+// (up = true: band over the post, lid; false: band under it, base); the cap
+// stands btn_seat proud of the seat and runs flush to the lid top / base
+// bottom, so it prints from the bed.
+module band_button(z_seat, up) {
+    pz0 = up ? z_seat - post_h : z_seat;
+    cz0 = up ? z_seat + btn_seat - cap_h : 0;
+    module rbox(w, h, y0, y1, z0)
+        translate([band_x, y1, z0]) rotate([-90, 0, 0]) linear_extrude(y0 - y1)
+            offset(r = 1) offset(delta = -1) translate([-w/2, -h]) square([w, h]);
+    rbox(post_w, post_h, 0.01, -post_out - 0.01, pz0);
+    rbox(cap_w, cap_h, -post_out, -post_out - cap_t, cz0);
 }
 
 module hf_label() {
@@ -217,7 +210,7 @@ module hf_label() {
 module base() with_provenance() {
     base_body();
     union() {
-        translate([body_x/2, body_y/2 + 6, 0]) rotate([0, 180, 0])   // clear of the band pockets
+        translate([body_x/2, body_y/2, 0]) rotate([0, 180, 0])
             provenance(w = body_x - 4, h = 22, mode = "inlay");
         hf_label();
     }
@@ -255,9 +248,8 @@ module lid_body() {
                         translate([0, 0, -1]) cylinder(d = ring_id, h = 20);
                     }
             lid_knuckle();
-            band_tab();
+            band_button(lid_top_z - btn_seat, up = true);
         }
-        band_tab_cuts();
         translate([0, hinge_y, hinge_z]) xcyl(pin_d_lid/2, -1, body_x + 1);
     }
 }
@@ -265,23 +257,6 @@ module lid_body() {
 module lid_knuckle() {
     translate([lid_knuckle[0], 0, 0]) rotate([0, 90, 0]) linear_extrude(lid_knuckle[1] - lid_knuckle[0])
         polygon([for (p = knuckle_profile(1)) [-p[1], p[0]]]);
-}
-
-// Tab on the lid front, full lid height, flush with the lid top (prints on
-// the bed). Also the finger grip for opening.
-module band_tab() {
-    translate([band_x - tab_w/2, -tab_out, z_rim]) cube([tab_w, tab_out + 0.01, lid_top_z - z_rim]);
-}
-
-// The band's upper end: a pocket in the lid top behind the tab's front edge,
-// reached by a shallow channel; chamfer on the edge the band wraps.
-module band_tab_cuts() {
-    x0 = band_x - band_w/2;
-    translate([x0, lid_pocket[0], lid_top_z - lid_pocket_d])
-        cube([band_w, lid_pocket[1] - lid_pocket[0], lid_pocket_d + 1]);
-    translate([x0, -tab_out - 1, lid_top_z - lid_chan_d]) cube([band_w, tab_out + 1 + lid_pocket[0] + 0.01, 1]);
-    translate([band_x, -tab_out, lid_top_z - lid_chan_d])
-        rotate([45, 0, 0]) cube([band_w, 1.2, 1.2], center = true);
 }
 
 /* ---------- Previews ---------- */
@@ -294,18 +269,20 @@ module contents() {
     spare = ["red", "red", "red", "blue", "blue", "blue", "yellow", "green", "pink"];
     for (p = [0:2], k = [0:2]) translate([peg_x[p], peg_y, well_z + k*cuff_h]) revo_cuff(spare[p*3 + k]);
     color("dimgray", 0.8) translate([sock_div_x + 2 + 0.5, well_y0 + 1.5, well_z]) cube(sock_est);
-    band_preview(bot_pockets[1]);
+    band_preview();
 }
 
-// The band in place, seated in the underside pocket at Y = py.
-module band_preview(py, t = 1.0) {
-    lp = (lid_pocket[0] + lid_pocket[1]) / 2;
-    path = [[lp, lid_top_z - lid_pocket_d + t/2], [lp, lid_top_z - t/2],
-            [-tab_out - t/2, lid_top_z - t/2], [-t/2 + chan_d, t/2], [py, t/2],
-            [py, bot_pocket_d - t/2]];
-    color("saddlebrown") for (dx = [-1.5, 1.5]) for (i = [0 : len(path) - 2])
-        hull() for (q = [path[i], path[i + 1]])
-            translate([band_x + dx, q[0], q[1]]) cube([2.5, t, t], center = true);
+// The band in place: two strands beside the posts, over the lid post and
+// under the base post.
+module band_preview(t = 1.0) {
+    y = -post_out / 2;
+    top = lid_top_z - btn_seat + t/2;
+    bot = btn_seat - t/2;
+    color("saddlebrown") {
+        for (dx = [-1, 1]) translate([band_x + dx * (post_w + t)/2 - t/2, y - 1.25, bot - t/2])
+            cube([t, 2.5, top - bot + t]);
+        for (z = [top, bot]) translate([band_x - post_w/2 - t, y - 1.25, z - t/2]) cube([post_w + 2*t, 2.5, t]);
+    }
 }
 
 module lid_open(angle = 105) {
