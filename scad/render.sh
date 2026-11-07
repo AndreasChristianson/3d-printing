@@ -34,7 +34,17 @@ echo "tag: $path @ $sha"
 tag=(-D "scad_path=\"$path\"" -D "git_sha=\"$sha\"")
 if grep -q "with_provenance" "$src"; then
     "$openscad" -o "$out" "${tag[@]}" -D 'prov_part="body"' "$@" "$src"
-    "$openscad" -o "${out%.stl}.tag.stl" "${tag[@]}" -D 'prov_part="tag"' "$@" "$src"
+    # a part of the file may carry no tag (e.g. a lid when the base has it):
+    # then there's no tag STL, and any stale one goes
+    rm -f "${out%.stl}.tag.stl"
+    if ! log=$("$openscad" -o "${out%.stl}.tag.stl" "${tag[@]}" -D 'prov_part="tag"' "$@" "$src" 2>&1); then
+        if grep -q "top level object is empty" <<<"$log" && ! grep -q "ERROR" <<<"$log"; then
+            echo "no tag in this part"
+        else
+            echo "$log" >&2
+            exit 1
+        fi
+    fi
 else
     "$openscad" -o "$out" "${tag[@]}" "$@" "$src"
 fi

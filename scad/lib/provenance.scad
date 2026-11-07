@@ -27,15 +27,18 @@
 //            the bed. Crispest text (it's the first layers); each text layer
 //            costs a filament change.
 //
-// Legibility comes from the stroke width: a stem has to be at least three
-// extrusion lines wide (prov_min_stroke); two lines printed lumpy and one
-// prints as a wiggly bead. The tag is file + SHA, and stops the render if
+// Legibility comes from the stroke width: the thinnest stroke has to be at
+// least three extrusion lines wide (prov_min_stroke); two lines printed lumpy
+// and one prints as a wiggly bead. The thinnest stroke is usually a
+// horizontal bar (the bars of E, F, Z, 2, 7, and _), not a vertical stem;
+// measuring stems alone overstated it by ~25% and printed bars as 1-2 lines. The tag is file + SHA, and stops the render if
 // that can't reach prov_min_stroke in the given area. The path, and then the
 // repo, are added only if the text still reaches prov_extra_stroke with
 // them, so they never shrink the essentials to the bare minimum.
 //
 // prov_fields = "sha" tags with the SHA alone, for a part with only one
-// pattern in the repo (or one obvious one): fewer, bigger characters.
+// pattern in the repo (or one obvious one): fewer, bigger characters. Set it
+// for the whole file, or per tag with provenance(..., fields = "sha").
 
 prov_repo  = "github.com/AndreasChristianson/3d-printing";
 scad_path  = "untagged.scad";   // set by render.sh
@@ -55,15 +58,16 @@ prov_upper_below = 1.2;     //   thinner than this; the SHA is always caps
 prov_lead  = 0.25;      // gap between lines, per unit of text size
 
 // Monospace fonts only (the fit assumes a fixed advance). Per unit of
-// OpenSCAD text size: [font, stem, advance, above baseline, below baseline].
+// OpenSCAD text size: [font, thinnest stroke, advance, above baseline,
+// below baseline].
 // Add a font with scad/lib/font_metrics.sh.
 prov_fonts = [
-    ["JetBrains Mono:style=ExtraBold", 0.249, 0.833, 1.153, 0.250],
-    ["JetBrains Mono:style=Bold", 0.208, 0.833, 1.153, 0.250],
-    ["Overpass Mono:style=Bold", 0.203, 0.856, 0.999, 0.298],
-    ["Atkinson Hyperlegible Mono:style=ExtraBold", 0.252, 0.878, 1.064, 0.285],
-    ["Atkinson Hyperlegible Mono:style=Bold", 0.215, 0.878, 1.043, 0.279],
-    ["Liberation Mono:style=Bold", 0.211, 0.833, 1.007, 0.294],
+    ["JetBrains Mono:style=ExtraBold", 0.194, 0.833, 1.153, 0.250],
+    ["JetBrains Mono:style=Bold", 0.157, 0.833, 1.153, 0.250],
+    ["Overpass Mono:style=Bold", 0.130, 0.856, 0.999, 0.298],
+    ["Atkinson Hyperlegible Mono:style=ExtraBold", 0.190, 0.878, 1.064, 0.285],
+    ["Atkinson Hyperlegible Mono:style=Bold", 0.165, 0.878, 1.043, 0.279],
+    ["Liberation Mono:style=Bold", 0.065, 0.833, 1.007, 0.294],
 ];
 
 function prov_metrics(font) =
@@ -95,10 +99,10 @@ function prov_fit(lines, w, h, m) =
 
 // The richest layout whose stroke is enough for its fields: [lines, size],
 // or undef. Each field set is tried stacked and on one line.
-function prov_layout(w, h, m) =
+function prov_layout(w, h, m, fields = prov_fields) =
     let (sha  = prov_upcase(git_sha),
          path = prov_noext(scad_path),
-         sets = prov_fields == "sha" ? [[sha]]
+         sets = fields == "sha" ? [[sha]]
               : [[prov_repo, path, sha], [path, sha], [prov_basename(path), sha]],
          fits = [for (f = sets)
                      let (one = [len(f) == 1 ? f[0]
@@ -106,18 +110,18 @@ function prov_layout(w, h, m) =
                           s_stack = prov_fit(f, w, h, m),
                           s_one   = prov_fit(one, w, h, m))
                      s_stack >= s_one ? [f, s_stack] : [one, s_one]],
-         need = prov_fields == "sha" ? [prov_min_stroke]
+         need = fields == "sha" ? [prov_min_stroke]
               : [prov_extra_stroke, prov_extra_stroke, prov_min_stroke],
          ok = [for (i = [0 : len(fits) - 1]) if (fits[i][1] * m[1] >= need[i]) fits[i]])
     len(ok) > 0 ? ok[0] : undef;
 
 module provenance(w, h, mode = prov_mode, depth = prov_depth, font = prov_font,
-                  halign = "center") {
+                  halign = "center", fields = prov_fields) {
     m = prov_metrics(font);
-    layout = let (l = prov_layout(w, h, m))
+    layout = let (l = prov_layout(w, h, m, fields))
         assert(!is_undef(l),
                str("provenance: ", w, " x ", h, " mm is too small for \"",
-                   prov_fields == "sha" ? "" : str(prov_basename(prov_noext(scad_path)), " "),
+                   fields == "sha" ? "" : str(prov_basename(prov_noext(scad_path)), " "),
                    prov_upcase(git_sha), "\" at a ",
                    prov_min_stroke, " mm stroke in ", font))
         l;

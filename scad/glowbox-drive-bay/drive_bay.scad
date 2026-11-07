@@ -216,10 +216,12 @@ assert(hole_x + cbore_d / 2 < rail_w / 2 - det_beam - det_slot - 1,
 module rail() with_provenance() {
     rail_body();
     // raised from the pocket floor; it runs along the rail and reads from
-    // outside (-Z)
+    // outside (-Z). SHA only: the slot is too narrow for the file name at a
+    // legible stroke.
     translate([0, (hdd_side_hole_y[0] + hdd_side_hole_y[1]) / 2, rail_tag_pocket])
         rotate([0, 180, 90])
-            provenance(w = rail_tag_l - 2, h = rail_tag_w - 2, depth = rail_tag_pocket - rail_tag_relief);
+            provenance(w = rail_tag_l - 2, h = rail_tag_w - 2, depth = rail_tag_pocket - rail_tag_relief,
+                       fields = "sha");
 }
 
 module rail_body() {
