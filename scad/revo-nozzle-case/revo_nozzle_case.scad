@@ -5,8 +5,7 @@
 // - 8 sockets, 2 rows x 4, nozzles stand tip-up so the cuff colours show.
 //   The left 2x2 group is for High Flow nozzles: "HF" down the left edge and
 //   a ridge between the groups (a 0.4 and a 0.4 HF look identical).
-// - Spare-cuff well at the back: 3 pegs x 3 cuffs, plus a bay for the
-//   HeaterCore sock.
+// - Open cubby at the back for loose spare cuffs and the HeaterCore sock.
 // - Lid on a 1.75 filament pin hinge at the back, held shut by a rubber
 //   band at the front (a printed snap arm would flex across its layer lines).
 //   The band loops between two buttons on the front: one flush with the lid
@@ -23,8 +22,8 @@
 // Parts (render each with scad/render.sh, which also writes .tag.stl):
 //   scad/render.sh revo_nozzle_case.scad base.stl -D 'part="base"'
 //   scad/render.sh revo_nozzle_case.scad lid.stl  -D 'part="lid"'
-// The base's .tag.stl is the bottom provenance inlay plus the "HF" label:
-// give it a contrasting filament. Print the base upright, the lid upside
+// The base's .tag.stl is the bottom provenance inlay (SHA only) plus the
+// "HF" label: give it a contrasting filament. The lid has no tag. Print the base upright, the lid upside
 // down (top on the bed). Pin: a ~70 mm length of 1.75 filament.
 // Band: the render echoes the loop length it is stretched to.
 //
@@ -33,6 +32,7 @@
 include <revo_nozzle.scad>
 include <../lib/provenance.scad>
 show_revo_nozzle = false;
+prov_fields = "sha";   // one case pattern: the SHA alone, big enough to read
 
 $fn = 64;
 part = "assembly";   // base | lid | assembly | open | exploded
@@ -40,7 +40,7 @@ part = "assembly";   // base | lid | assembly | open | exploded
 /* ---------- Envelope (bin 80 x 70 x 75) ---------- */
 body_x   = 77;
 body_y   = 57;
-wall     = 2.4;
+wall     = 1.6;    // 4 lines at 0.4
 floor_t  = 1.6;
 corner_r = 3;
 
@@ -69,26 +69,20 @@ label_font  = "JetBrains Mono:style=ExtraBold";
 /* ---------- Lid / rim ---------- */
 z_rim       = deck_z + 2.2;     // base/lid parting plane, 40.4
 lid_ceil_z  = tip_top_z + 1.2;  // lid inside
-lid_top_t   = 1.6;
+lid_top_t   = 1.2;
 lid_top_z   = lid_ceil_z + lid_top_t;   // 46
-lip_in      = 2.6;              // lid lip, inset from the outside
+lip_in      = wall + 0.2;       // lid lip, inset from the outside
 lip_t       = 1.2;
 lip_h       = 1.8;
 ring_od     = 12;               // hold-down rings, on the cuff only
 ring_id     = 7;
 ring_press  = 0.3;              // squeeze on the silicone
 
-/* ---------- Spares well ---------- */
+/* ---------- Spares cubby ---------- */
 well_y0     = row_y[1] + cb_d/2 + 1.2;   // 35.2
 well_y1     = body_y - wall;
-well_z      = lid_ceil_z - 18;           // 26.4: 3 cuffs + finger room
-peg_d       = cuff_id - 0.6;
-peg_h       = 14;
-peg_y       = (well_y0 + well_y1) / 2;
-peg_x       = [for (i = [0:2]) wall + 1 + cuff_od/2 + 1 + i*15];   // 3 pegs
-sock_div_x  = 50;
-// HeaterCore sock (est, not measured): fits the bay x 51.2..74.6, 18 deep
-sock_est    = [20, 16, 14];
+well_z      = lid_ceil_z - 18;           // 18 deep: fingertip reach
+well_r      = 4;                         // floor fillet, so cuffs slide out
 
 /* ---------- Hinge ---------- */
 hinge_r     = 3.2;
@@ -104,7 +98,7 @@ lid_knuckle   = [22 + hinge_gap, 55 - hinge_gap];
 band_x      = body_x / 2;
 btn_seat    = 2.0;    // band seat (post top) below the lid top / above the base bottom
 post_w      = 5;      // post, X; the band strands run either side of it
-post_h      = 3;      // post, Z
+post_h      = 2.5;    // post, Z
 post_out    = 3;      // post length out from the wall (Y): room for 2 wraps
 cap_w       = 11;     // cap, X
 cap_t       = 1.6;    // cap, Y
@@ -144,7 +138,7 @@ module base_body() {
         }
         // interior above the deck / well
         translate([0, 0, deck_z]) linear_extrude(z_rim) rrect(body_x, body_y, inset = wall);
-        translate([wall, well_y0, well_z]) cube([body_x - 2*wall, well_y1 - well_y0, z_rim]);
+        cubby();
         // sockets
         for (x = col_x, y = row_y) translate([x, y, 0]) {
             translate([0, 0, floor_t]) cylinder(d = hole_d, h = deck_z);
@@ -154,15 +148,17 @@ module base_body() {
         // pin
         translate([0, hinge_y, hinge_z]) xcyl(pin_d_base/2, -1, body_x + 1);
     }
-    // spares: cuff pegs and the sock bay divider
-    for (x = peg_x) translate([x, peg_y, well_z - 0.01]) {
-        cylinder(d = peg_d, h = peg_h - 1);
-        translate([0, 0, peg_h - 1]) cylinder(d1 = peg_d, d2 = peg_d - 2, h = 1);
-    }
-    translate([sock_div_x, well_y0, well_z - 0.01]) cube([1.2, well_y1 - well_y0, 14]);
     // ridge between the HF and standard groups
     translate([(col_x[1] + col_x[2] - ridge_w)/2, row_y[0] - cb_d/2, deck_z - 0.01])
         cube([ridge_w, row_y[1] - row_y[0] + cb_d, ridge_h]);
+}
+
+// The spares cubby: one open pit, its floor edges rounded front and back.
+module cubby() intersection() {
+    translate([wall, 0, 0]) rotate([90, 0, 90]) linear_extrude(body_x - 2*wall)
+        offset(r = well_r) offset(delta = -well_r)
+            translate([well_y0, well_z]) square([well_y1 - well_y0, z_rim + 10 - well_z]);
+    linear_extrude(z_rim + 10) rrect(body_x, body_y, inset = wall);   // keep the corner walls
 }
 
 module base_knuckle(x0, x1) {
@@ -217,11 +213,8 @@ module base() with_provenance() {
 }
 
 /* ---------- Lid ---------- */
-// tag inlaid in the lid top (on the bed as printed)
-module lid() with_provenance() {
-    lid_body();
-    translate([body_x/2, body_y/2, lid_top_z]) provenance(w = body_x - 4, h = 30, mode = "inlay");
-}
+// no tag: the base carries it
+module lid() if (prov_part != "tag") lid_body();
 
 module lid_body() {
     difference() {
@@ -266,9 +259,10 @@ module contents() {
     for (i = [0:3], j = [0:1])
         translate([col_x[i], row_y[j], cuff_bot_z + cuff_z1])
             rotate([180, 0, 0]) revo_nozzle(cuff_colors[i*2 + j]);
+    // loose spares in the cubby
     spare = ["red", "red", "red", "blue", "blue", "blue", "yellow", "green", "pink"];
-    for (p = [0:2], k = [0:2]) translate([peg_x[p], peg_y, well_z + k*cuff_h]) revo_cuff(spare[p*3 + k]);
-    color("dimgray", 0.8) translate([sock_div_x + 2 + 0.5, well_y0 + 1.5, well_z]) cube(sock_est);
+    for (k = [0:8]) translate([wall + 8 + (k % 5) * 14, (well_y0 + well_y1)/2, well_z + floor(k / 5) * cuff_h])
+        revo_cuff(spare[k]);
     band_preview();
 }
 
