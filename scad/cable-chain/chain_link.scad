@@ -80,8 +80,11 @@ gusset   = 2;      // 45 deg fill: under the fixed bar where it meets the
 // fixed bar, to match its legs. Each leg is a cantilever snap fit down the
 // outside of a side plate, with a `gusset` fill at its root; sized by
 // strain at the root = 1.5 * leg_t * (barb_d - fit) / (flex - barb_d)^2,
-// flex = leg_l - gusset. Keep it around 1% (PLA allows ~2%, PETG ~3.5%).
-// At 16 / 1.2 / 1.0 it is 0.9%. (The first try, 7 / 1.5 / 0.9, was 4.2%:
+// flex = leg_l - gusset. PLA allows ~2%, PETG ~3.5%. At 13 / 1.2 / 1.0 it
+// is 1.5%: deliberately over the ~1% comfort level, because 16 mm legs
+// (0.9%) let the bars fall out. The 11 mm flex is about twice as stiff as
+// 14, so about twice the pull-out force; expect the odd leg to crack when
+// prying. (The first try, 7 / 1.5 / 0.9, was 4.2%:
 // it would crack. v1, inside legs at 11 / 1.2 / 0.7 with 0.2 fits, printed
 // loose: 0.5 mm of barb in the pocket, 0.3 mm of rattle up/down, and 3 mm
 // of slide along the chain in the ear seat.) Seated, the barbs' catch
@@ -89,7 +92,7 @@ gusset   = 2;      // 45 deg fill: under the fixed bar where it meets the
 // little flexed and pull the plate down onto its seats: no rattle.
 ear_t    = 2;      // bar plate thickness = seat depth
 fit      = 0.15;   // bar-to-link clearance, each side
-leg_l    = 16;     // leg below the bar plate (long = low strain)
+leg_l    = 13;     // leg below the bar plate (shorter = stiffer, more strain)
 leg_t    = 1.2;    // leg thickness (y): its flex
 // The snap-in bar and its legs run bar_x0..snap_x1. At full bend the next
 // link's outer layer, in the same y band as the legs, sweeps in to
