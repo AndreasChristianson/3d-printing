@@ -1,14 +1,22 @@
 // chain_link.scad
 // Openable cable-chain link for the Kobra Max X gantry and Z chains.
 //
-// Replaces the "Chain link 55 degree angle" link printed at 200%. It keeps
-// that chain's 34 mm pitch, 28.6 mm height and 55 deg max bend per link (so
-// the bend radius and the end heights stay the same), and widens it from
-// 34 to 45 mm outside, 22 -> 33 mm clear inside.
+// Replaces the "Chain link 55 degree angle" link, printed at 200% for the
+// Z chain and 150% for the X chain. Both new chains are 45 mm wide outside,
+// 33 mm clear inside. The size comes from `chain`:
+//   "z": the old 200% link's 34 mm pitch, 28.6 mm height and 55 deg max bend
+//        (same bend radius and end heights), so 20.6 mm clear inside.
+//   "x": 28 mm pitch, 22 mm tall, 60 deg: folds 180 deg in ~78 mm outside,
+//        like the old 150% X chain (76.7), with 14 mm clear inside.
+// Straight, it stops 2 deg
+// short of flat (178 deg), bowed toward the inside of the bend, so the
+// plastic's give lets a self-supporting run settle flat instead of sagging.
 //
 // One crossbar per link is a separate snap-in bar (bar()): pry it off with
-// a screwdriver, lay the wires in, press it back. Its two barbed legs click
-// into pockets in the side plates.
+// a screwdriver, lay the wires in, press it back. It spans the full width;
+// its two barbed legs run down recesses in the side plates' OUTSIDE faces
+// (flush) and click into pockets there, so the channel stays smooth inside
+// and the legs are easy to reach to release.
 //
 // Frame: x along the chain (rear pivot hole at x=0, front pin at x=pitch),
 // y across (0..width), z up (0..height). The chain bends toward z=0: the
@@ -18,9 +26,9 @@
 //
 // Each side plate is two layers: the outer layer carries the rear pivot
 // hole, the inner layer carries the front pin. Their profiles come from
-// sweeping the neighbor link through 0..max_bend, so the clearance cuts are
-// also the bend stops (straight stop on the outside, max_bend stop on the
-// inside).
+// sweeping the neighbor link through flat_stop..max_bend, so the clearance
+// cuts are also the bend stops (straight stop on the outside, max_bend stop
+// on the inside).
 //
 // part = "link" | "bar" | "print" (link + bar laid out for the bed)
 //      | "link_print" (the link alone, as printed, with its provenance tag)
@@ -28,16 +36,19 @@
 //      two neighbors at bend; renders empty when they clear)
 
 include <../lib/provenance.scad>
+prov_fields = "sha";   // one chain pattern: the SHA alone reads best
 
 part      = "print";
-open_side = "inner";   // "inner" (X chain) | "outer" (Z chain)
-check_a   = 55;      // bend for part = "check"
+chain     = "z";     // "z" | "x": the size preset
+open_side = chain == "x" ? "inner" : "outer";
 
-pitch    = 34;     // pin to pin
-height   = 28.6;   // outside, z
+pitch    = chain == "x" ? 32 : 34;     // pin to pin
+height   = chain == "x" ? 22 : 28.6;   // outside, z
 inner_w  = 33;     // clear width between the inner plates
 t        = 3;      // one plate layer; a side plate is 2 layers
-max_bend = 55;     // deg per link
+max_bend = chain == "x" ? 60 : 55;     // deg per link
+check_a   = max_bend; // bend for part = "check"
+flat_stop = 2;     // deg: the straightest it goes (180 - 2 = 178 deg)
 gap      = 0.4;    // running clearance between neighbors
 
 pin_d    = 10;
@@ -53,26 +64,49 @@ bar_t    = 4;      // crossbar thickness (z)
 bar_c    = 1;      // 45 deg chamfer on the bars' channel-side edges across
                    //   the chain, so pulled wires don't drag on a corner
 edge_c   = 1;      // 45 deg chamfer on the link's four outside long edges
-bar_x0   = 10;     // crossbar span along x: mid-link, where both plate
-bar_x1   = 24;     //   layers are solid, clear of the pin and the hole
+bar_x0   = 10;     // snap-in bar's start, clear of the pivot hole
+fix_x0   = chain == "x" ? 7 : 10;   // fixed crossbar span along x:
+fix_x1   = chain == "x" ? 21 : 24;  //   mid-link, where the inner layer is
+                   //   solid, clear of the pin and the hole (it's trimmed
+                   //   to the inner layer's profile anyway). 14 mm long so
+                   //   the tag fits.
+gusset   = 2;      // 45 deg fill: under the fixed bar where it meets the
+                   //   inner plates, and at the snap-in bar's leg roots
 
-// snap-in bar. Each leg is a cantilever snap fit; sized by
-// strain at the root = 1.5 * leg_t * (barb_d - fit) / (leg_l - barb_d)^2.
-// Keep it under ~1% (PLA allows ~2%, PETG ~3.5%). At 11 / 1.2 / 0.7 it is
-// 0.8%: ~30 MPa in PLA, ~36 N to push the whole bar in, ~30 N to pull it
-// out (45 deg lead-in, 34 deg catch, mu 0.3). Seated, the legs are
-// unloaded. (The first try, 7 / 1.5 / 0.9, was 4.2%: it would crack.)
-ear_t    = 2;      // ears rest on a seat cut into the inner plate's edge
-fit      = 0.2;    // bar-to-link clearance, each side
-leg_l    = 11;     // leg below the bar's underside (long = low strain)
+// snap-in bar. A plate ear_t thick spans the full width over the side
+// plates, sitting in a seat cut ear_t into their edges, so its top is flush
+// with the link's face; its body (bar_t, chamfered like the fixed bar)
+// hangs between the inner plates. It runs bar_x0..snap_x1, shorter than the
+// fixed bar, to match its legs. Each leg is a cantilever snap fit down the
+// outside of a side plate, with a `gusset` fill at its root; sized by
+// strain at the root = 1.5 * leg_t * (barb_d - fit) / (flex - barb_d)^2,
+// flex = leg_l - gusset. PLA allows ~2%, PETG ~3.5%. At 13 / 1.2 / 1.0 it
+// is 1.5%: deliberately over the ~1% comfort level, because 16 mm legs
+// (0.9%) let the bars fall out. The 11 mm flex is about twice as stiff as
+// 14, so about twice the pull-out force; expect the odd leg to crack when
+// prying. (The first try, 7 / 1.5 / 0.9, was 4.2%:
+// it would crack. v1, inside legs at 11 / 1.2 / 0.7 with 0.2 fits, printed
+// loose: 0.5 mm of barb in the pocket, 0.3 mm of rattle up/down, and 3 mm
+// of slide along the chain in the ear seat.) Seated, the barbs' catch
+// slopes sit snap_preload into the pocket's top edge, so the legs stay a
+// little flexed and pull the plate down onto its seats: no rattle.
+ear_t    = 2;      // bar plate thickness = seat depth
+fit      = 0.15;   // bar-to-link clearance, each side
+leg_l    = 13;     // leg below the bar plate (shorter = stiffer, more strain)
 leg_t    = 1.2;    // leg thickness (y): its flex
-leg_w    = bar_x1 - bar_x0;   // legs run the bar's full length, so the bar
-                   //   is one constant profile standing on its end: no
-                   //   overhangs (see bar_print())
-barb_d   = 0.7;    // barb reach into the pocket
-pocket_d = 1.0;    // barb pocket depth in the inner plate (of its 3 mm)
-barb_h   = 2.2;    // barb height
-pry_gap  = 2;      // gap behind the bar's rear end for a screwdriver
+// The snap-in bar and its legs run bar_x0..snap_x1. At full bend the next
+// link's outer layer, in the same y band as the legs, sweeps in to
+// pitch - h sin(max_bend) - gap: x = 21.9 for "z", 18.1 for "x".
+snap_x1  = floor(pitch - height / 2 * sin(max_bend) - gap - 0.4);
+barb_d   = 1.0;    // barb reach: 1.0 - fit = 0.85 into the pocket
+pocket_d = 1.2;    // barb pocket depth past the leg recess (the recess +
+                   //   pocket is 2.55 of the outer layer's 3 mm)
+barb_h   = 2.4;    // barb height
+barb_c   = 0.6;    // rise of the barb's catch slope (31 deg: pry-able)
+snap_preload = 0.15; // barb top above the pocket top, seated
+pry_gap  = 2;      // the recess and pocket run on past the leg tip: a small
+                   //   screwdriver goes in there and wedges on the barb's
+                   //   45 deg lead-in, springing the leg out
 
 width  = inner_w + 4 * t;
 h      = height / 2;   // pivot height
@@ -90,20 +124,32 @@ module rear_body(len = pitch) { translate([0, -h]) square([len, height]); }
 module front_body(len = pitch) { translate([-len, -h]) square([len, height]); }
 module nose() { circle(r = nose_r); }
 
-// Union of a convex shape rotated through 0..a about the origin.
-module sweep(a, steps = 22) {
+// Union of a convex shape rotated through a0..a1 about the origin.
+module sweep(a0, a1, steps = 22) {
     for (i = [0 : steps - 1])
-        hull() { rotate(a * i / steps) children(); rotate(a * (i + 1) / steps) children(); }
+        hull() {
+            rotate(a0 + (a1 - a0) * i / steps) children();
+            rotate(a0 + (a1 - a0) * (i + 1) / steps) children();
+        }
 }
+// The straight stop: the shoulder faces are radial and the cut is offset by
+// gap, which lets the neighbor turn back gap / r past the sweep's start
+// (1.6 deg at the shoulder's outer corner, r = h). So the sweep starts that
+// much past flat_stop, and the shoulders touch at flat_stop. Each layer's
+// body runs stop_ext past the neighbor's pivot line so the sweep has
+// material to shape the stop from (at flat_stop = 0 it would end exactly on
+// that line).
+stop_a = flat_stop + gap / h * 180 / PI;
+stop_ext = 2;
 
 // Outer layer: rear end with the pivot hole, cut to clear the next link's
 // rear end as it bends (clockwise, toward z=0).
 module outer_profile() {
     difference() {
-        translate([0, h]) { nose(); rear_body(); }
+        translate([0, h]) { nose(); rear_body(pitch + stop_ext); }
         translate([pitch, h]) {
             offset(delta = gap) nose();
-            sweep(-max_bend) offset(delta = gap) rear_body(pitch + 10);
+            sweep(-stop_a, -max_bend) offset(delta = gap) rear_body(pitch + 10);
         }
         translate([0, h]) circle(d = hole_d);
     }
@@ -112,10 +158,10 @@ module outer_profile() {
 // front end (which turns counter-clockwise relative to this one).
 module inner_profile() {
     difference() {
-        translate([pitch, h]) { nose(); front_body(); }
+        translate([pitch, h]) { nose(); front_body(pitch + stop_ext); }
         translate([0, h]) {
             offset(delta = gap) nose();
-            sweep(max_bend) offset(delta = gap) front_body(pitch + 10);
+            sweep(stop_a, max_bend) offset(delta = gap) front_body(pitch + 10);
         }
     }
 }
@@ -169,31 +215,58 @@ module bar_box(x0, l, y0, w) {
     }
 }
 
-// Fixed crossbar on the top face, or the bottom one (bottom = true),
-// trimmed to the inner plate profile so it clears the neighbors.
-module fixed_bar(bottom) {
+// 45 deg fill of `gusset` in the inside corners under a top crossbar,
+// where it meets the inner plates. Its ends follow
+// the bar's bar_c end chamfers down, so the bar's ends stay one 45 deg face.
+module bar_gussets() {
+    zb = height - bar_t;
     intersection() {
-        slab(t, width - t) inner_profile();
-        flip_z(bottom)
-            bar_box(bar_x0, bar_x1 - bar_x0, t, width - 2 * t);
+        both_sides() translate([0, 2 * t, zb]) rotate([90, 0, 90])
+            linear_extrude(pitch) polygon([[-0.01, 0.01], [gusset, 0.01], [-0.01, -gusset]]);
+        hull() {
+            translate([fix_x0, 0, zb + bar_c - 0.01]) cube([fix_x1 - fix_x0, width, 0.01]);
+            translate([fix_x0 + bar_c + gusset, 0, zb - gusset])
+                cube([fix_x1 - fix_x0 - 2 * (bar_c + gusset), width, 0.01]);
+        }
     }
 }
 
-// Cuts for the snap-in bar, top side: the ear seat in the inner plate's
-// edge, and a shallow pocket in the inner plate's inside face that the barb
-// catches in. Not a through-window: at this height (the pivot height) the
-// outer layer is only ~14 mm long between its clearance arcs, and a window
-// would cut it open at the front edge. Release by prying at the pry gap.
+// Fixed crossbar on the top face, or the bottom one (bottom = true), with
+// its gussets, trimmed to the inner plate profile so it clears the
+// neighbors.
+module fixed_bar(bottom) {
+    intersection() {
+        slab(t, width - t) inner_profile();
+        flip_z(bottom) {
+            bar_box(fix_x0, fix_x1 - fix_x0, t, width - 2 * t);
+            bar_gussets();
+        }
+    }
+}
+
+// Cuts for the snap-in bar, top side, on the y = 0 plate (mirrored): the
+// seat for the bar plate across both layers, the leg's recess in the outer
+// face, and the barb's pocket at the bottom of the recess. The inside faces
+// are untouched.
+leg_zb = height - ear_t - leg_l;     // leg tip
 module bar_cuts_top() {
+    zs = height - ear_t;
     both_sides() {
-        // seat for the ear, plus the pry gap behind it
-        translate([bar_x0 - pry_gap, t - 0.01, height - ear_t])
-            cube([bar_x1 - bar_x0 + pry_gap + 1, t + 0.02, ear_t + 1]);
-        // pocket: barb catches its top edge
-        wz1 = height - bar_t - leg_l + barb_h + 0.1;
-        wz0 = height - bar_t - leg_l - 0.6;
-        translate([(bar_x0 + bar_x1) / 2 - leg_w / 2 - 0.4, 2 * t - pocket_d, wz0])
-            cube([leg_w + 0.8, pocket_d + 0.01, wz1 - wz0]);
+        // seat: fit at each end, so the plate stops the bar sliding along
+        // the chain
+        translate([bar_x0 - fit, -0.01, zs])
+            cube([snap_x1 - bar_x0 + 2 * fit, 2 * t + 0.01, ear_t + 1]);
+        // leg recess, on past the tip by pry_gap
+        translate([bar_x0 - fit, -0.01, leg_zb - pry_gap])
+            cube([snap_x1 - bar_x0 + 2 * fit, leg_t + fit + 0.01, zs - leg_zb + pry_gap + 1]);
+        // chamfer the plate's corner to clear the leg root's fill
+        translate([bar_x0 - fit, leg_t + fit - 0.01, zs + 0.01]) rotate([90, 0, 90])
+            linear_extrude(snap_x1 - bar_x0 + 2 * fit)
+                polygon([[0, 0], [gusset + 2 * fit, 0], [0, -gusset - 2 * fit]]);
+        // pocket: the barb's catch slope bears on its top edge
+        translate([bar_x0 - fit, leg_t + fit - 0.01, leg_zb - pry_gap])
+            cube([snap_x1 - bar_x0 + 2 * fit, pocket_d + 0.01,
+                  pry_gap + barb_h - snap_preload]);
     }
 }
 
@@ -213,32 +286,38 @@ module link() {
 
 // The snap-in bar, in link coordinates for the top side.
 module bar_in_place() {
-    bl = bar_x1 - bar_x0;
-    // body between the inner plates
-    bar_box(bar_x0, bl, 2 * t + fit, width - 4 * t - 2 * fit);
-    // ears over the seats
-    translate([bar_x0, t + fit, height - ear_t + fit])
-        cube([bl, width - 2 * t - 2 * fit, ear_t - fit]);
-    // legs + barbs
+    bl = snap_x1 - bar_x0;
+    zs = height - ear_t;
+    difference() {
+        union() {
+            // plate over the seats, flush with the outside faces
+            translate([bar_x0, 0, zs]) cube([bl, width, ear_t]);
+            // body between the inner plates
+            bar_box(bar_x0, bl, 2 * t + fit, width - 4 * t - 2 * fit);
+        }
+        // the link's outside long edge chamfer, carried across the plate
+        both_sides() translate([pitch / 2, 0, height]) rotate([45, 0, 0])
+            cube([pitch + 60, edge_c * sqrt(2), edge_c * sqrt(2)], center = true);
+    }
     both_sides() {
-        x0 = (bar_x0 + bar_x1) / 2 - leg_w / 2;
-        ly = 2 * t + fit;
-        zb = height - bar_t - leg_l;
-        translate([x0, ly, zb]) cube([leg_w, leg_t, leg_l + 0.01]);
-        // fill the body's chamfer above the leg, so the leg root is solid
-        translate([bar_x0, ly, height - bar_t]) cube([bl, leg_t, bar_t]);
-        // barb: 45 deg lead-in below, ~60 deg catch on top (pry-able)
-        translate([x0, ly, zb]) rotate([90, 0, 90]) linear_extrude(leg_w)
-            polygon([[0, 0], [-barb_d, barb_d], [-barb_d, barb_h - 0.6], [0, barb_h]]);
+        ll = bl;
+        // leg, flush with the outside face
+        translate([bar_x0, 0, leg_zb]) cube([ll, leg_t, leg_l + 0.01]);
+        // gusset at the root, inside the L of plate + leg
+        translate([bar_x0, leg_t - 0.01, zs + 0.01]) rotate([90, 0, 90]) linear_extrude(ll)
+            polygon([[0, 0], [gusset, 0], [0, -gusset]]);
+        // barb, pointing in: 45 deg lead-in at the tip, barb_c catch slope
+        translate([bar_x0, leg_t - 0.01, leg_zb]) rotate([90, 0, 90]) linear_extrude(ll)
+            polygon([[0, 0], [barb_d, barb_d], [barb_d, barb_h - barb_c], [0, barb_h]]);
     }
 }
 module bar() { flip_z(open_bottom) bar_in_place(); }
 
 // The bar as printed: standing on its rear end face (x = bar_x0 on the
-// bed), legs horizontal. Every layer is a full cross-section of the top,
+// bed), legs horizontal. Every layer is a full cross-section of the bar,
 // both legs and both barbs, so the legs flex along the layer lines, not
 // across them (printed on its back, the legs snap off at a layer line).
-// The flat end is 4 x 39 mm on the bed: add a brim if it tips.
+// The end on the bed is the full 45 mm wide: add a brim if it tips.
 module bar_print() {
     rotate([0, -90, 0]) translate([-bar_x0, 0, -height]) bar_in_place();
 }
@@ -249,12 +328,12 @@ module bar_print() {
 module link_tagged() with_provenance() {
     link();
     tag_w = width - 2 * edge_c - 2;
-    tag_h = bar_x1 - bar_x0 - 2;
+    tag_h = fix_x1 - fix_x0 - 2;
     if (open_bottom)    // fixed bar on top: the top face prints down
-        translate([(bar_x0 + bar_x1) / 2, width / 2, height]) rotate([0, 0, 90])
+        translate([(fix_x0 + fix_x1) / 2, width / 2, height]) rotate([0, 0, 90])
             provenance(w = tag_w, h = tag_h, mode = "inlay");
     else                // fixed bar on the bottom
-        translate([(bar_x0 + bar_x1) / 2, width / 2, 0]) rotate([0, 180, 0]) rotate([0, 0, 90])
+        translate([(fix_x0 + fix_x1) / 2, width / 2, 0]) rotate([0, 180, 0]) rotate([0, 0, 90])
             provenance(w = tag_w, h = tag_h, mode = "inlay");
 }
 // The link as printed: removable side up, so the fixed bar (and the tag)
@@ -281,8 +360,9 @@ module chain(n = 4, a = max_bend) {
     }
     step(0);
 }
-// Overlap of two neighbors (with their bars) at bend a; and of a link with
-// its own bar. Both should come out empty or zero-volume.
+// Overlap of two neighbors (with their bars) at bend a: empty from
+// flat_stop to max_bend. And of a link with its own bar: just the
+// snap_preload slivers where the barbs bear on the pocket tops.
 module check(a = max_bend) {
     intersection() {
         union() { link(); bar(); }

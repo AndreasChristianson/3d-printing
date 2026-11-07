@@ -27,12 +27,15 @@
 //            the bed. Crispest text (it's the first layers); each text layer
 //            costs a filament change.
 //
-// Legibility comes from the stroke width: a stem has to be about two
-// extrusion lines wide (prov_min_stroke) or it prints as one wiggly bead.
-// The tag is file + SHA, and stops the render if that can't reach
-// prov_min_stroke in the given area. The path, and then the repo, are added
-// only if the text still reaches prov_extra_stroke with them, so they never
-// shrink the essentials to the bare minimum.
+// Legibility comes from the stroke width: a stem has to be at least three
+// extrusion lines wide (prov_min_stroke); two lines printed lumpy and one
+// prints as a wiggly bead. The tag is file + SHA, and stops the render if
+// that can't reach prov_min_stroke in the given area. The path, and then the
+// repo, are added only if the text still reaches prov_extra_stroke with
+// them, so they never shrink the essentials to the bare minimum.
+//
+// prov_fields = "sha" tags with the SHA alone, for a part with only one
+// pattern in the repo (or one obvious one): fewer, bigger characters.
 
 prov_repo  = "github.com/AndreasChristianson/3d-printing";
 scad_path  = "untagged.scad";   // set by render.sh
@@ -42,9 +45,11 @@ prov_part  = "all";     // "all" (preview) | "body" | "tag", set by render.sh
 prov_mode  = "emboss";  // "emboss" | "inlay"
 prov_depth = 0.6;       // 3 layers at 0.2; use 0.8 for light text on a dark part
 prov_font  = "JetBrains Mono:style=ExtraBold";
-prov_min_stroke  = 0.9; // ~2 lines of a 0.4 nozzle
-prov_extra_stroke = 1.2; // the path and repo only go on at this stroke or more
-prov_max_stroke  = 1.5; // caps the size in a big area
+prov_fields = "auto";   // "auto" (file + SHA, more if it fits) | "sha"
+prov_line   = 0.45;     // extrusion line width (0.4 nozzle)
+prov_min_stroke  = 3 * prov_line;   // 1.35: 3 lines
+prov_extra_stroke = 4 * prov_line;  // 1.8: the path and repo only go on at this or more
+prov_max_stroke  = 4 * prov_line;   // caps the size in a big area
 prov_upper       = "auto";  // true | false | "auto": caps when the stroke is
 prov_upper_below = 1.2;     //   thinner than this; the SHA is always caps
 prov_lead  = 0.25;      // gap between lines, per unit of text size
@@ -93,13 +98,16 @@ function prov_fit(lines, w, h, m) =
 function prov_layout(w, h, m) =
     let (sha  = prov_upcase(git_sha),
          path = prov_noext(scad_path),
-         sets = [[prov_repo, path, sha], [path, sha], [prov_basename(path), sha]],
+         sets = prov_fields == "sha" ? [[sha]]
+              : [[prov_repo, path, sha], [path, sha], [prov_basename(path), sha]],
          fits = [for (f = sets)
-                     let (one = [len(f) == 2 ? str(f[0], " ", f[1]) : str(f[0], " ", f[1], " ", f[2])],
+                     let (one = [len(f) == 1 ? f[0]
+                               : len(f) == 2 ? str(f[0], " ", f[1]) : str(f[0], " ", f[1], " ", f[2])],
                           s_stack = prov_fit(f, w, h, m),
                           s_one   = prov_fit(one, w, h, m))
                      s_stack >= s_one ? [f, s_stack] : [one, s_one]],
-         need = [prov_extra_stroke, prov_extra_stroke, prov_min_stroke],
+         need = prov_fields == "sha" ? [prov_min_stroke]
+              : [prov_extra_stroke, prov_extra_stroke, prov_min_stroke],
          ok = [for (i = [0 : len(fits) - 1]) if (fits[i][1] * m[1] >= need[i]) fits[i]])
     len(ok) > 0 ? ok[0] : undef;
 
@@ -109,7 +117,8 @@ module provenance(w, h, mode = prov_mode, depth = prov_depth, font = prov_font,
     layout = let (l = prov_layout(w, h, m))
         assert(!is_undef(l),
                str("provenance: ", w, " x ", h, " mm is too small for \"",
-                   prov_basename(prov_noext(scad_path)), " ", prov_upcase(git_sha), "\" at a ",
+                   prov_fields == "sha" ? "" : str(prov_basename(prov_noext(scad_path)), " "),
+                   prov_upcase(git_sha), "\" at a ",
                    prov_min_stroke, " mm stroke in ", font))
         l;
     lines = layout[0];

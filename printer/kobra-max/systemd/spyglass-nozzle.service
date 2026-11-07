@@ -1,0 +1,25 @@
+# /etc/systemd/system/spyglass-nozzle.service
+# Second spyglass instance for the IMX219 nozzle cam (camera 1, port 8081, /webcam2/).
+# Same install as spyglass.service, separate config file.
+# Install: sed "s/PRINTER_USER/<login user>/g" spyglass-nozzle.service | sudo tee /etc/systemd/system/spyglass-nozzle.service
+
+[Unit]
+Description=spyglass - nozzle cam (camera 1)
+Documentation=https://github.com/roamingthings/spyglass
+After=udev.service network-online.target nss-lookup.target spyglass.service
+Wants=udev.service network-online.target
+StartLimitBurst=10
+StartLimitIntervalSec=180
+
+[Install]
+WantedBy=multi-user.target
+
+[Service]
+Type=simple
+User=PRINTER_USER
+RemainAfterExit=Yes
+WorkingDirectory=/home/PRINTER_USER/spyglass
+ExecStart=/usr/local/bin/spyglass -c /home/PRINTER_USER/printer_data/config/spyglass-nozzle.conf
+Nice=10
+Restart=on-failure
+RestartSec=5
