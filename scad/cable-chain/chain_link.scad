@@ -327,6 +327,8 @@ module bar() { flip_z(open_bottom) bar_in_place(); }
 // both legs and both barbs, so the legs flex along the layer lines, not
 // across them (printed on its back, the legs snap off at a layer line).
 // The end on the bed is the full 45 mm wide: add a brim if it tips.
+// The "x" and "z" bars are identical (same x range, width and legs, all
+// measured from the bar's top face), so one bar.stl serves both chains.
 module bar_print() {
     rotate([0, -90, 0]) translate([-bar_x0, 0, -height]) bar_in_place();
 }
