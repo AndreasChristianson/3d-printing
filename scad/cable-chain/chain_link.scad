@@ -61,17 +61,18 @@ bar_c    = 1;      // 45 deg chamfer on the bars' channel-side edges across
 edge_c   = 1;      // 45 deg chamfer on the link's four outside long edges
 bar_x0   = 10;     // crossbar span along x: mid-link, where both plate
 bar_x1   = 24;     //   layers are solid, clear of the pin and the hole
-gusset   = 2;      // 45 deg fill in the channel's inside corners, under
-                   //   both crossbars where they meet the inner plates
+gusset   = 2;      // 45 deg fill: under the fixed bar where it meets the
+                   //   inner plates, and at the snap-in bar's leg roots
 
 // snap-in bar. A plate ear_t thick spans the full width over the side
 // plates, sitting in a seat cut ear_t into their edges, so its top is flush
-// with the link's face; its body (bar_t, chamfered and gusseted like the
-// fixed bar) hangs between the inner plates. Each leg is a cantilever snap
-// fit down the outside of a side plate; sized by
+// with the link's face; its body (bar_t, chamfered like the fixed bar)
+// hangs between the inner plates. It runs bar_x0..snap_x1, shorter than the
+// fixed bar, to match its legs. Each leg is a cantilever snap fit down the
+// outside of a side plate, with a `gusset` fill at its root; sized by
 // strain at the root = 1.5 * leg_t * (barb_d - fit) / (flex - barb_d)^2,
-// flex = leg_l - root_g. Keep it around 1% (PLA allows ~2%, PETG ~3.5%).
-// At 15 / 1.2 / 1.0 it is 0.9%. (The first try, 7 / 1.5 / 0.9, was 4.2%:
+// flex = leg_l - gusset. Keep it around 1% (PLA allows ~2%, PETG ~3.5%).
+// At 16 / 1.2 / 1.0 it is 0.9%. (The first try, 7 / 1.5 / 0.9, was 4.2%:
 // it would crack. v1, inside legs at 11 / 1.2 / 0.7 with 0.2 fits, printed
 // loose: 0.5 mm of barb in the pocket, 0.3 mm of rattle up/down, and 3 mm
 // of slide along the chain in the ear seat.) Seated, the barbs' catch
@@ -79,13 +80,11 @@ gusset   = 2;      // 45 deg fill in the channel's inside corners, under
 // little flexed and pull the plate down onto its seats: no rattle.
 ear_t    = 2;      // bar plate thickness = seat depth
 fit      = 0.15;   // bar-to-link clearance, each side
-leg_l    = 15;     // leg below the bar plate (long = low strain)
+leg_l    = 16;     // leg below the bar plate (long = low strain)
 leg_t    = 1.2;    // leg thickness (y): its flex
-leg_x1   = 21;     // legs run bar_x0..leg_x1: at full bend the next link's
-                   //   outer layer sweeps in to x = 21.9 (z ~6), in the
-                   //   same y band as the legs. They start at bar_x0, the
-                   //   end the bar prints on, so they don't overhang.
-root_g   = 1;      // 45 deg fill at the leg root, inside the L of plate + leg
+snap_x1  = 21;     // the snap-in bar and its legs run bar_x0..snap_x1: at
+                   //   full bend the next link's outer layer sweeps in to
+                   //   x = 21.9 (z ~6), in the same y band as the legs
 barb_d   = 1.0;    // barb reach: 1.0 - fit = 0.85 into the pocket
 pocket_d = 1.2;    // barb pocket depth past the leg recess (the recess +
                    //   pocket is 2.55 of the outer layer's 3 mm)
@@ -204,12 +203,12 @@ module bar_box(x0, l, y0, w) {
 }
 
 // 45 deg fill of `gusset` in the inside corners under a top crossbar,
-// where it meets the inner plates (at y0 and its mirror). Its ends follow
+// where it meets the inner plates. Its ends follow
 // the bar's bar_c end chamfers down, so the bar's ends stay one 45 deg face.
-module bar_gussets(y0 = 2 * t) {
+module bar_gussets() {
     zb = height - bar_t;
     intersection() {
-        both_sides() translate([0, y0, zb]) rotate([90, 0, 90])
+        both_sides() translate([0, 2 * t, zb]) rotate([90, 0, 90])
             linear_extrude(pitch) polygon([[-0.01, 0.01], [gusset, 0.01], [-0.01, -gusset]]);
         hull() {
             translate([bar_x0, 0, zb + bar_c - 0.01]) cube([bar_x1 - bar_x0, width, 0.01]);
@@ -243,17 +242,17 @@ module bar_cuts_top() {
         // seat: fit at each end, so the plate stops the bar sliding along
         // the chain
         translate([bar_x0 - fit, -0.01, zs])
-            cube([bar_x1 - bar_x0 + 2 * fit, 2 * t + 0.01, ear_t + 1]);
+            cube([snap_x1 - bar_x0 + 2 * fit, 2 * t + 0.01, ear_t + 1]);
         // leg recess, on past the tip by pry_gap
         translate([bar_x0 - fit, -0.01, leg_zb - pry_gap])
-            cube([leg_x1 - bar_x0 + 2 * fit, leg_t + fit + 0.01, zs - leg_zb + pry_gap + 1]);
+            cube([snap_x1 - bar_x0 + 2 * fit, leg_t + fit + 0.01, zs - leg_zb + pry_gap + 1]);
         // chamfer the plate's corner to clear the leg root's fill
         translate([bar_x0 - fit, leg_t + fit - 0.01, zs + 0.01]) rotate([90, 0, 90])
-            linear_extrude(leg_x1 - bar_x0 + 2 * fit)
-                polygon([[0, 0], [root_g + 2 * fit, 0], [0, -root_g - 2 * fit]]);
+            linear_extrude(snap_x1 - bar_x0 + 2 * fit)
+                polygon([[0, 0], [gusset + 2 * fit, 0], [0, -gusset - 2 * fit]]);
         // pocket: the barb's catch slope bears on its top edge
         translate([bar_x0 - fit, leg_t + fit - 0.01, leg_zb - pry_gap])
-            cube([leg_x1 - bar_x0 + 2 * fit, pocket_d + 0.01,
+            cube([snap_x1 - bar_x0 + 2 * fit, pocket_d + 0.01,
                   pry_gap + barb_h - snap_preload]);
     }
 }
@@ -274,27 +273,26 @@ module link() {
 
 // The snap-in bar, in link coordinates for the top side.
 module bar_in_place() {
-    bl = bar_x1 - bar_x0;
+    bl = snap_x1 - bar_x0;
     zs = height - ear_t;
     difference() {
         union() {
             // plate over the seats, flush with the outside faces
             translate([bar_x0, 0, zs]) cube([bl, width, ear_t]);
-            // body between the inner plates, with its gussets
+            // body between the inner plates
             bar_box(bar_x0, bl, 2 * t + fit, width - 4 * t - 2 * fit);
-            bar_gussets(2 * t + fit);
         }
         // the link's outside long edge chamfer, carried across the plate
         both_sides() translate([pitch / 2, 0, height]) rotate([45, 0, 0])
             cube([pitch + 60, edge_c * sqrt(2), edge_c * sqrt(2)], center = true);
     }
     both_sides() {
-        ll = leg_x1 - bar_x0;
+        ll = bl;
         // leg, flush with the outside face
         translate([bar_x0, 0, leg_zb]) cube([ll, leg_t, leg_l + 0.01]);
-        // fill at the root, inside the L
+        // gusset at the root, inside the L of plate + leg
         translate([bar_x0, leg_t - 0.01, zs + 0.01]) rotate([90, 0, 90]) linear_extrude(ll)
-            polygon([[0, 0], [root_g, 0], [0, -root_g]]);
+            polygon([[0, 0], [gusset, 0], [0, -gusset]]);
         // barb, pointing in: 45 deg lead-in at the tip, barb_c catch slope
         translate([bar_x0, leg_t - 0.01, leg_zb]) rotate([90, 0, 90]) linear_extrude(ll)
             polygon([[0, 0], [barb_d, barb_d], [barb_d, barb_h - barb_c], [0, barb_h]]);
@@ -303,8 +301,8 @@ module bar_in_place() {
 module bar() { flip_z(open_bottom) bar_in_place(); }
 
 // The bar as printed: standing on its rear end face (x = bar_x0 on the
-// bed), legs horizontal. Up to leg_x1 every layer is a full cross-section
-// of the bar, both legs and both barbs, so the legs flex along the layer lines, not
+// bed), legs horizontal. Every layer is a full cross-section of the bar,
+// both legs and both barbs, so the legs flex along the layer lines, not
 // across them (printed on its back, the legs snap off at a layer line).
 // The end on the bed is the full 45 mm wide: add a brim if it tips.
 module bar_print() {
