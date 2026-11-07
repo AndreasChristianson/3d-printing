@@ -45,6 +45,12 @@ if grep -q "with_provenance" "$src"; then
             exit 1
         fi
     fi
+    # an untagged part outside with_provenance() renders whole in the tag
+    # pass too: that "tag" is just a copy of the body
+    if cmp -s "$out" "${out%.stl}.tag.stl"; then
+        rm -f "${out%.stl}.tag.stl"
+        echo "no tag in this part"
+    fi
 else
     "$openscad" -o "$out" "${tag[@]}" "$@" "$src"
 fi
