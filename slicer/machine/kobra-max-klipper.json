@@ -53,7 +53,9 @@
 	"printable_area": [
 		"7x0",
 		"375x0",
-		"375x415",
+		"375x385",
+		"303x385",
+		"303x415",
 		"0x415",
 		"0x105",
 		"7x105"
@@ -67,6 +69,7 @@
 		"Direct Drive Standard"
 	],
 	"printer_settings_id": "kobra-max-klipper",
+	"printhost_apikey": "REDACTED",
 	"retract_length_toolchange": [
 		"5"
 	],
