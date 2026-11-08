@@ -48,7 +48,7 @@ inner_w  = 33;     // clear width between the inner plates
 t        = 3;      // one plate layer; a side plate is 2 layers
 max_bend = chain == "x" ? 60 : 55;     // deg per link
 check_a   = max_bend; // bend for part = "check"
-flat_stop = 1.25;  // deg: the straightest it goes (178.75 deg; 2 sagged)
+flat_stop = 1.05;  // deg: the straightest it goes (178.95 deg; 2 sagged, 1.25 too tight)
 gap      = 0.4;    // running clearance between neighbors
 
 pin_d    = 10;
