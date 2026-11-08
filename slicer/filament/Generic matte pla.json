@@ -21,10 +21,7 @@
 		"200"
 	],
 	"filament_retraction_length": [
-		"0.5"
-	],
-	"filament_retraction_speed": [
-		"30"
+		"0.8"
 	],
 	"filament_settings_id": [
 		"Generic matte pla"
@@ -32,12 +29,12 @@
 	"filament_shrink": [
 		"99.56%"
 	],
-	"filament_z_hop": [
-		"0.4"
-	],
 	"from": "User",
 	"inherits": "Generic PLA @System",
 	"name": "Generic matte pla",
+	"nozzle_temperature": [
+		"218"
+	],
 	"overhang_fan_speed": [
 		"70"
 	],
