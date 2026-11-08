@@ -91,7 +91,7 @@ gusset   = 2;      // 45 deg fill: under the fixed bar where it meets the
 // slopes sit snap_preload into the pocket's top edge, so the legs stay a
 // little flexed and pull the plate down onto its seats: no rattle.
 ear_t    = 2;      // bar plate thickness = seat depth
-seam_d   = 1;      // depth of the seam notch in the bar plate's outside face
+seam_d   = 1;      // depth of the seam relief at the bar body's root (of its 2)
 fit      = 0.15;   // bar-to-link clearance, each side
 leg_l    = 13;     // leg below the bar plate (shorter = stiffer, more strain)
 leg_t    = 1.2;    // leg thickness (y): its flex
@@ -308,16 +308,18 @@ module bar_in_place() {
         // the link's outside long edge chamfer, carried across the plate
         both_sides() translate([pitch / 2, 0, height]) rotate([45, 0, 0])
             cube([pitch + 60, edge_c * sqrt(2), edge_c * sqrt(2)], center = true);
-        // seam notch: a 60 deg V down the middle of the outside face, the
-        // sharpest inside corner of each printed layer (the body meets the
-        // plate at 90), so the slicer's seam goes here and not into a
-        // barb's root (a seam blob there kept one barb out of its pocket).
-        // Deep enough that the outer wall's toolpath, offset in half a line
-        // width, still has a ~0.5 mm V to put the seam in.
-        sw = seam_d * tan(30);
-        translate([bar_x0 - 1, width / 2, height]) rotate([90, 0, 90])
+        // seam relief: where the body meets the plate, a 45 deg undercut
+        // into the body's side, its top flush with the plate's underside.
+        // Orca's "aligned" seam goes to that hidden inside corner (a
+        // seam blob there, against the inner plate, kept one side of the
+        // bar from seating; an outside-face notch didn't draw it, being
+        // visible). Now the corner is this sharper 45 deg apex seam_d into
+        // the body, so the blob sits in the relief, clear of the link.
+        yb = 2 * t + fit;
+        both_sides() translate([bar_x0 - 1, 0, 0]) rotate([90, 0, 90])
             linear_extrude(bl + 2)
-                polygon([[-sw, 0.01], [sw, 0.01], [0, -seam_d]]);
+                polygon([[yb - 0.01, zs], [yb + seam_d, zs],
+                         [yb, zs - seam_d], [yb - 0.01, zs - seam_d]]);
     }
     both_sides() {
         ll = bl;
