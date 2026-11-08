@@ -41,11 +41,19 @@ txt       = "HEATER";
 bundle_d  = 3.5;         // wire group diameter (flattened bundles: use the thick side)
 
 /* ---------- Text ---------- */
-font     = "Helvetica Neue:style=Condensed Bold";
-txt_size = 5.2;          // OpenSCAD text size; caps come out ~3.8 mm
-txt_t    = 0.6;          // 3 layers at 0.2; use 0.8 for light text on a dark base
-pad_x    = 2.0;          // text -> tab end
-min_len  = 14;           // short words still get a usable tab
+// Legibility comes from the stroke width, as in lib/provenance.scad: the
+// thinnest stroke should be three extrusion lines (~1.35 mm), and the base
+// left between strokes (E arms, P/R bowls, letter gaps) shouldn't drop much
+// under two. So the caps fill the whole tab height, in a narrow monoline font
+// thickened a little and spaced out: strokes ~1.3 mm, E counters ~1 mm, and
+// the labels stay short. Bolder fonts (Avenir Next Condensed Heavy, Helvetica
+// Neue Condensed Black) close the counters up instead.
+font        = "DIN Condensed:style=Bold";
+txt_grow    = 0.2;       // outline offset; thickens strokes by twice this
+txt_spacing = 1.2;       // letter spacing: keeps the gaps between letters open
+txt_t       = 0.6;       // 3 layers at 0.2; use 0.8 for light text on a dark base
+pad_x       = 2.0;       // text -> tab end
+min_len     = 14;        // short words still get a usable tab
 
 /* ---------- Tab ---------- */
 tab_h    = 8;            // across the wire
@@ -76,8 +84,14 @@ $fn = 64;
 
 inlay = style == "clip" || text_mode == "inlay";
 
-tm    = textmetrics(text = txt, size = txt_size, font = font, halign = "center", valign = "center");
-tab_l = max(min_len, tm.size.x + 2 * pad_x);
+// Caps run edge to edge across the tab; round letters overshoot a hair and
+// get trimmed by the tab outline.
+txt_h    = tab_h;
+txt_size = (txt_h - 2 * txt_grow) * 10
+           / textmetrics(text = "H", size = 10, font = font).size.y;
+tm    = textmetrics(text = txt, size = txt_size, font = font, spacing = txt_spacing,
+                    halign = "center", valign = "center");
+tab_l = max(min_len, tm.size.x + 2 * txt_grow + 2 * pad_x);
 
 module rrect(size, r) {
     offset(r) offset(-r) square(size, center = true);
@@ -85,8 +99,12 @@ module rrect(size, r) {
 
 // Inlay text is mirrored: it's read from the bed side.
 module text_2d() {
-    mirror([inlay ? 1 : 0, 0])
-        text(txt, size = txt_size, font = font, halign = "center", valign = "center");
+    mirror([inlay ? 1 : 0, 0]) intersection() {
+        offset(delta = txt_grow)
+            text(txt, size = txt_size, font = font, spacing = txt_spacing,
+                 halign = "center", valign = "center");
+        square([tab_l, txt_h], center = true);
+    }
 }
 
 module label_text() {

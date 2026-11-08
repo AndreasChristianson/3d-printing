@@ -11,7 +11,7 @@ one plate per background color: the labels print face down with the text
 inlaid, and mixed backgrounds would need a filament change on every layer,
 not just the text layers.
 
-Usage:  python3 build_3mf.py [--slots black=2,white=3,red=4] [PLATE ...]
+Usage:  python3 build_3mf.py [--slots black=4,white=3,red=2] [PLATE ...]
         (default: every set_<color> plate -> wire_labels_set_<color>.3mf)
 Needs:  openscad on PATH, and `pip install trimesh numpy`.
 """
@@ -29,8 +29,8 @@ import trimesh
 HERE = Path(__file__).resolve().parent
 SCAD = HERE / "wire_label.scad"
 
-# Filament slot per color (1-based: lane1 = T0 = 1). Lane 1 holds glow PLA, unused.
-SLOTS = {"black": 2, "white": 3, "red": 4}
+# Filament slot per color (1-based: lane1 = T0 = 1). Lane 1 (black PETG) is unused.
+SLOTS = {"black": 4, "white": 3, "red": 2}
 
 # Category -> (background, text).
 CATEGORY = {
@@ -169,7 +169,7 @@ def build(plate, slots):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--slots", help="filament slots, e.g. black=2,white=3,red=4")
+    ap.add_argument("--slots", help="filament slots, e.g. black=4,white=3,red=2")
     ap.add_argument("plates", nargs="*", default=list(PLATES))
     args = ap.parse_args()
     slots = dict(SLOTS)
