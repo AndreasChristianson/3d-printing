@@ -6,7 +6,7 @@
 // 33 mm clear inside. The size comes from `chain`:
 //   "z": the old 200% link's 34 mm pitch, 28.6 mm height and 55 deg max bend
 //        (same bend radius and end heights), so 20.6 mm clear inside.
-//   "x": 28 mm pitch, 22 mm tall, 60 deg: folds 180 deg in ~78 mm outside,
+//   "x": 32 mm pitch, 22 mm tall, 60 deg: folds 180 deg in ~78 mm outside,
 //        like the old 150% X chain (76.7), with 14 mm clear inside.
 // Straight, it stops 2 deg
 // short of flat (178 deg), bowed toward the inside of the bend, so the
