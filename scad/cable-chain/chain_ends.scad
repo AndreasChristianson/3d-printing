@@ -9,14 +9,18 @@
 //               pins into it. The mount is on the +x side.
 // The chain runs pin end -> hole end, so each chain has one of each.
 //
-// end = "x_bottom"   X chain, fixed end: plate on the gantry's left end
-//                    plate, under where the cables come out. 4x M3 on
-//                    38.6 x 20, same as the old part. Pin end.
+// end = "x_bottom"   X chain, fixed end: a flange screwed up under the
+//                    gantry's left end, where the cables come round the
+//                    gantry's edge from the Z chain's top mount. Same 3
+//                    screw positions and pivot as the old "chain tower
+//                    mount v8", M4 down through the gantry into heat-sets.
+//                    The chain's Y+ edge stays where the old one was; the
+//                    extra width goes to Y-. Pin end.
 //     | "x_toolhead" X chain, moving end: sits on the toolhead's top
 //                    bracket, 2x M3 in line along the chain, 12 mm apart
 //                    (the old 100% "Fixed end 2 holes", printed at 150%).
 //                    Hole end.
-//     | "z_base"     Z chain, fixed end: the same plate as x_bottom, on top
+//     | "z_base"     Z chain, fixed end: a plate on top
 //                    of the bottom 4040, centred, 4x M3 into T-nuts (20 mm
 //                    across the rail = its two slots, 38.6 along it). Pin end.
 //     | "z_top"      Z chain, moving end: the old "z cable chain top mount"
@@ -42,11 +46,51 @@ m3_d     = 3.4;    // M3 clearance
 m3_head  = 6.0;    // counterbore for an M3 socket head
 m3_head_h = 3.2;
 
+// Rigid ends: the fixed ends hold their first link straight (at flat_stop,
+// the chain's own straight), no bending at the mount. A link's plates are
+// cut for the neighbor's whole swing (sweep from the straight stop to
+// max_bend); a rigid end's are cut only for the neighbor at straight, plus
+// rigid_fit. Toward straight the usual stop holds it; the other way its
+// shoulder meets the end's plate after rigid_fit / h (~0.8 deg on X).
+rigid_fit = 0.15;
+module outer_profile_rigid() {     // pin end: the next link is held
+    difference() {
+        translate([0, h]) { nose(); rear_body(pitch + stop_ext); }
+        translate([pitch, h]) {
+            offset(delta = gap) nose();
+            rotate(-flat_stop) offset(delta = rigid_fit) rear_body(pitch + 10);
+        }
+        translate([0, h]) circle(d = hole_d);
+    }
+}
+module inner_profile_rigid() {     // hole end: the previous link is held
+    difference() {
+        translate([pitch, h]) { nose(); front_body(pitch + stop_ext); }
+        translate([0, h]) {
+            offset(delta = gap) nose();
+            rotate(flat_stop) offset(delta = rigid_fit) front_body(pitch + 10);
+        }
+    }
+}
+// side_plate() (chain_link.scad) with the rigid profiles
+module side_plate_rigid() {
+    difference() {
+        slab(0, t) outer_profile_rigid();
+        translate([-hole_d / 2, t, h]) rotate([0, 0, atan2(ramp_k, -1)])
+            translate([0, -50, -50]) cube(100);
+    }
+    slab(t, 2 * t) inner_profile_rigid();
+    translate([pitch, 0, h]) difference() {
+        rotate([-90, 0, 0]) cylinder(d = pin_d, h = t + 1);
+        rotate([0, 0, -atan(ramp_k)]) translate([0, -50, -50]) cube(100);
+    }
+}
+
 // A link's plates between x0 and x1, edges chamfered like the link.
-module link_plates(x0, x1) {
+module link_plates(x0, x1, rigid = false) {
     difference() {
         intersection() {
-            both_sides() side_plate();
+            both_sides() if (rigid) side_plate_rigid(); else side_plate();
             translate([x0, -1, -1]) cube([x1 - x0, width + 2, height + 2]);
         }
         both_sides() for (z = [0, height])
@@ -59,21 +103,22 @@ module link_plates(x0, x1) {
 // (X), z = 0 when it opens on the outside (Z).
 fixed_z0 = open_bottom ? height - bar_t : 0;
 
-// ---------- fixed ends: X on the gantry, Z on the 4040 (pin ends) ----------
+// ---------- Z chain, fixed end on the 4040 (pin end) ----------
 
-// pivot to the mounting face: 16.4 as on the old X part. The Z link's next
-// neighbor sweeps in to pitch - 11.9 at full bend, so the Z plate sits back.
+// A plate across the chain's end. Pivot to the mounting face: the Z link's
+// next neighbor sweeps in to pitch - 11.9 at full bend, so it sits back 19.
+// (It began as the X bottom end, from the wrong old part, hence the names.)
 xb_face  = chain == "x" ? 16.4 : 19;
 xb_t     = 5;      // plate thickness
-xb_h     = 48.6;   // plate height (z), as on the old part
+xb_h     = 48.6;   // plate height (z)
 xb_holes = [20, 38.6];   // hole spacing [y, z], centred on the chain
 
-module x_bottom() {
+module plate_end() {
     xf = pitch - xb_face;          // mounting face
     xp = xf + xb_t;                // chain side of the plate
     difference() {
         union() {
-            link_plates(xp - 0.01, pitch + nose_r + 1);
+            link_plates(xp - 0.01, pitch + nose_r + 1, rigid = true);
             // floor on the fixed side, between the plates, out to the pin
             intersection() {
                 slab(t, width - t) inner_profile();
@@ -91,15 +136,77 @@ module x_bottom() {
     }
 }
 // Its tag: inlaid in the mounting face (on the bed), between the holes.
-module x_bottom_tag() {
+module plate_end_tag() {
     translate([pitch - xb_face, width / 2, h]) rotate([0, -90, 0]) rotate([0, 0, 90])
         provenance(w = width - 4, h = xb_holes[1] - m3_head - 4, mode = "inlay");
 }
 // As printed: mounting face on the bed.
-module x_bottom_print() {
+module plate_end_print() {
     rotate([0, -90, 0]) translate([-(pitch - xb_face), 0, 0])
-        with_provenance() { x_bottom(); x_bottom_tag(); }
+        with_provenance() { plate_end(); plate_end_tag(); }
 }
+
+// ---------- X chain, fixed end under the gantry (pin end) ----------
+
+// The old "chain tower mount v8" (a 150% chain's hole end on a flange):
+// the flange's face is flush with the chain's inside-of-bend face and
+// screws up under the gantry; M4s come down through the gantry into it.
+// Its 3 holes, from its pivot, back along the chain (away from the
+// toolhead) and across from the chain's Y+ edge (+ = toward Y-):
+//   (27.37, -20.5) out on a wing past the Y+ edge
+//   (22.87,   3.5) in the Y+ side wall
+//   (27.37,  23.5) under the channel (inside the new 45 mm width)
+// In this frame (z = 0 against the gantry, y = 0 the Y+ edge, pivot at
+// x = pitch) the holes are at x = pitch - those.
+xg_holes = [[pitch - 27.37, -20.5], [pitch - 22.87, 3.5], [pitch - 27.37, 23.5]];
+xg_x0    = pitch - 38.9;   // the flange's back end, as on the old part
+xg_wing  = -27.5;          // the wing's edge (y)
+xg_floor = 4;              // flange thickness (= bar_t: flush with the links' bars)
+xg_x1    = pitch - nose_r - 1;   // floor ends short of the neighbor's nose
+xg_wall1 = 14;             // the side walls are plain boxes up to here,
+                           //   then the link's plates
+// M4 heat-set inserts, pressed in from the gantry face (on the bed)
+ins_d    = 5.6;    // insert bore
+ins_l    = 5;      // insert length; the bore is 1 deeper
+m4_d     = 4.5;    // screw clearance past the insert
+ins_pad  = 11;     // pad diameter around each insert
+ins_cap  = 1;      // floor left under the channel hole's bore
+
+module x_bottom() {
+    pad_h = ins_l + 1 + ins_cap;   // pad thickness
+    difference() {
+        union() {
+            link_plates(xg_wall1 - 0.01, pitch + nose_r + 1, rigid = true);
+            // side walls back to the flange's end, full height, outside
+            // long edges chamfered like the link's
+            both_sides() hull() {
+                translate([xg_x0, 0, 0]) cube([xg_wall1 - xg_x0, 2 * t, height - edge_c]);
+                translate([xg_x0, edge_c, 0]) cube([xg_wall1 - xg_x0, 2 * t - edge_c, height]);
+            }
+            // flange: the floor across the chain, out to the pin's nose
+            translate([xg_x0, 0, 0]) cube([xg_x1 - xg_x0, width, xg_floor]);
+            // the wing past the Y+ edge, corner chamfered
+            linear_extrude(xg_floor) polygon([
+                [xg_x0, 0.01], [xg_x0, xg_wing + 3], [xg_x0 + 3, xg_wing],
+                [xg_holes[0][0] + ins_pad / 2 + 2, xg_wing],
+                [xg_wall1, 0.01]]);
+            // pads round the inserts
+            for (p = xg_holes) translate([p[0], p[1], 0])
+                cylinder(d = ins_pad, h = pad_h, $fn = 48);
+        }
+        for (i = [0 : 2]) translate([xg_holes[i][0], xg_holes[i][1], 0]) {
+            translate([0, 0, -1]) cylinder(d = ins_d, h = ins_l + 1 + 1, $fn = 40);
+            // screw clearance past the insert: through the wing's pad, deep
+            // into the wall, and blind under the channel (no screw tip in
+            // the cables)
+            zc = i == 2 ? pad_h - ins_cap : i == 1 ? height - 2 : pad_h + 1;
+            translate([0, 0, ins_l]) cylinder(d = m4_d, h = zc - ins_l, $fn = 32);
+        }
+    }
+}
+// As printed: the gantry face on the bed. No tag: no face is long enough
+// for the SHA (the side wall is 29 mm, the floor between the inserts 11).
+module x_bottom_print() { x_bottom(); }
 
 // ---------- X chain, toolhead end (hole end) ----------
 
@@ -146,7 +253,7 @@ zt_win_h = 18.2;   // window height (z), centred on the pivot
 module z_top() {
     // the link half: flipped about the pivot height when the foot is on the
     // outside of the bend (the mount stays put)
-    flip_z(z_top_foot == "outside") link_plates(-nose_r - 1, zt_face);
+    flip_z(z_top_foot == "outside") link_plates(-nose_r - 1, zt_face, rigid = true);
     difference() {
         hull() {
             translate([zt_x0, edge_c, zt_foot]) cube([zt_face - zt_x0, width - 2 * edge_c, height - zt_foot]);
@@ -159,13 +266,25 @@ module z_top() {
         }
     }
 }
+// Its tag: inlaid in the mounting face (on the bed), between the screw
+// holes' row and the cable window, the full width (41 mm is what a 7-char
+// SHA needs at the minimum stroke).
+module z_top_tag() {
+    z0 = zt_holes[0][1] + m3_d / 2 + 0.5;   // above the screw holes
+    z1 = h - zt_win_h / 2 - 0.5;            // below the window
+    translate([zt_face, width / 2, (z0 + z1) / 2]) rotate([0, 90, 0]) rotate([0, 0, 90])
+        provenance(w = width - 4, h = z1 - z0, mode = "inlay");
+}
 // As printed: mounting face on the bed.
-module z_top_print() { rotate([0, 90, 0]) translate([-zt_face, 0, 0]) z_top(); }
+module z_top_print() {
+    rotate([0, 90, 0]) translate([-zt_face, 0, 0]) with_provenance() { z_top(); z_top_tag(); }
+}
 
 // ---------- dispatch ----------
 
 module end_in_place() {
-    if (end == "x_bottom" || end == "z_base") x_bottom();
+    if (end == "x_bottom") x_bottom();
+    else if (end == "z_base") plate_end();
     else if (end == "x_toolhead") x_toolhead();
     else if (end == "z_top") z_top();
 }
@@ -180,7 +299,8 @@ module neighbor(a) {
 }
 
 if (part == "end") {
-    if (end == "x_bottom" || end == "z_base") x_bottom_print();
+    if (end == "x_bottom") x_bottom_print();
+    else if (end == "z_base") plate_end_print();
     else if (end == "x_toolhead") x_toolhead_print();
     else if (end == "z_top") z_top_print();
 }
