@@ -239,9 +239,18 @@ module x_bottom() {
         }
     }
 }
-// As printed: the gantry face on the bed. No tag: no face is long enough
-// for the SHA (the side wall is 29 mm, the floor between the inserts 11).
-module x_bottom_print() { x_bottom(); }
+// Its tag: SHA only, inlaid in the gantry face (on the bed), across the
+// chain in the band between the middle insert and the floor's end. The
+// band (9.2) is under the 10 the layout needs, so the box reaches over the
+// insert's edge; the letters (~5 tall, centred) stay clear of the bore.
+module x_bottom_tag() {
+    x1 = xg_x1 - 0.3;
+    x0 = x1 - 10.5;
+    translate([(x0 + x1) / 2, (xg_yc + xg_edge) / 2, 0]) rotate([180, 0, 0]) rotate([0, 0, 90])
+        provenance(w = xg_edge - xg_yc - 2, h = x1 - x0, mode = "inlay", fields = "sha");
+}
+// As printed: the gantry face on the bed.
+module x_bottom_print() { with_provenance() { x_bottom(); x_bottom_tag(); } }
 
 // ---------- X chain, toolhead end (hole end) ----------
 
