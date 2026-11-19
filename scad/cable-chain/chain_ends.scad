@@ -257,8 +257,8 @@ zt_face  = 23.8;
 zt_foot  = -20;
 zt_holes = [[10.1, -15], [-12.0, -15]];   // [y from the chain's centre, z]
 zt_win_h = 18.2;   // window height (z), centred on the pivot
-m3_ins_d = 4.0;    // bore for an M3 heat-set, 4 OD x 5 long
-m3_ins_l = 5;      // bore depth: the insert sits flush
+m3_ins_d = 4.2;    // bore for an M3 heat-set, 5 OD x 4 long (as picam-mount)
+m3_ins_l = 4;      // bore depth: the insert sits flush
 
 module z_top() {
     link_plates(-nose_r - 1, zt_face, rigid = true);
