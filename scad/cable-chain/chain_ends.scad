@@ -14,8 +14,9 @@
 //                    gantry's edge from the Z chain's top mount. Same 3
 //                    screw positions and pivot as the old "chain tower
 //                    mount v8", M4 down through the gantry into heat-sets.
-//                    The chain's Y+ edge stays where the old one was; the
-//                    extra width goes to Y-. Pin end.
+//                    The chain's face on the gantry-edge side stays 5 in
+//                    from the flange's edge, as on the old one; the extra
+//                    width goes toward the wing. Pin end.
 //     | "x_toolhead" X chain, moving end: the old toolhead arm (2x M3
 //                    down into the toolhead, sticking out the back), its
 //                    pin block swapped for hangers holding a hole end
@@ -159,13 +160,22 @@ module plate_end_print() {
 // the flange's face is flush with the chain's inside-of-bend face and
 // screws up under the gantry; M4s come down through the gantry into it.
 // Its 3 holes, from its pivot, back along the chain (away from the
-// toolhead) and across from the chain's Y+ edge (+ = toward Y-):
-//   (27.37, -20.5) out on a wing past the Y+ edge
-//   (22.87,   3.5) in the Y+ side wall
-//   (27.37,  23.5) under the channel (inside the new 45 mm width)
-// In this frame (z = 0 against the gantry, y = 0 the Y+ edge, pivot at
-// x = pitch) the holes are at x = pitch - those.
+// toolhead) and across from the old chain's wing-side edge (+ = away from
+// the wing):
+//   (27.37, -20.5) out on the wing
+//   (22.87,   3.5) in the old chain's wing-side wall
+//   (27.37,  23.5) in the old chain's far wall
+// The old chain was 25.5 wide outside; its far face sat 5 in from the
+// flange's far edge (the gantry's edge side). That gap is kept: the new
+// chain's far face stays put and its extra width goes toward the wing.
+// In this frame (z = 0 against the gantry, y = 0 the old chain's wing-side
+// edge, pivot at x = pitch) the holes are at x = pitch - those; the chain
+// itself spans y = xg_yc .. xg_yc + width.
 xg_holes = [[pitch - 27.37, -20.5], [pitch - 22.87, 3.5], [pitch - 27.37, 23.5]];
+xg_old_w = 25.5;           // the old chain's outside width
+xg_gap   = 5;              // its far face to the flange's far edge
+xg_yc    = xg_old_w - width;   // the chain's wing-side face (y)
+xg_edge  = xg_old_w + xg_gap;  // the flange's far edge (y)
 xg_x0    = pitch - 38.9;   // the flange's back end, as on the old part
 xg_wing  = -27.5;          // the wing's edge (y)
 xg_floor = 4;              // flange thickness (= bar_t: flush with the links' bars)
@@ -173,41 +183,59 @@ xg_x1    = pitch - nose_r - 1;   // floor ends short of the neighbor's nose
 xg_wall1 = 14;             // the side walls are plain boxes up to here,
                            //   then the link's plates
 // M4 heat-set inserts, pressed in from the gantry face (on the bed)
-ins_d    = 5.6;    // insert bore
-ins_l    = 5;      // insert length; the bore is 1 deeper
+ins_d    = 5.2;    // bore for an M4 heat-set, 6 OD x 6 long (0.8 under
+                   //   the OD, like m3_ins_d for the 5 OD M3s)
+ins_l    = 6;      // insert length; the bore is 1 deeper
 m4_d     = 4.5;    // screw clearance past the insert
-ins_pad  = 11;     // pad diameter around each insert
-ins_cap  = 1;      // floor left under the channel hole's bore
+ins_pad  = 11;     // pad / boss diameter around each insert
+ins_cap  = 1;      // pad left above the channel hole's bore
+
+// The channel's clear span (y), between the side walls.
+xg_ch = [xg_yc + 2 * t, xg_yc + width - 2 * t];
+function xg_in_channel(p) = p[1] > xg_ch[0] && p[1] < xg_ch[1];
 
 module x_bottom() {
-    pad_h = ins_l + 1 + ins_cap;   // pad thickness
+    pad_h = ins_l + 1 + ins_cap;   // channel pad thickness
     difference() {
         union() {
-            link_plates(xg_wall1 - 0.01, pitch + nose_r + 1, rigid = true);
-            // side walls back to the flange's end, full height, outside
-            // long edges chamfered like the link's
-            both_sides() hull() {
-                translate([xg_x0, 0, 0]) cube([xg_wall1 - xg_x0, 2 * t, height - edge_c]);
-                translate([xg_x0, edge_c, 0]) cube([xg_wall1 - xg_x0, 2 * t - edge_c, height]);
+            translate([0, xg_yc, 0]) {
+                link_plates(xg_wall1 - 0.01, pitch + nose_r + 1, rigid = true);
+                // side walls back to the flange's end, full height, outside
+                // long edges chamfered like the link's
+                both_sides() hull() {
+                    translate([xg_x0, 0, 0]) cube([xg_wall1 - xg_x0, 2 * t, height - edge_c]);
+                    translate([xg_x0, edge_c, 0]) cube([xg_wall1 - xg_x0, 2 * t - edge_c, height]);
+                }
             }
-            // flange: the floor across the chain, out to the pin's nose
-            translate([xg_x0, 0, 0]) cube([xg_x1 - xg_x0, width, xg_floor]);
-            // the wing past the Y+ edge, corner chamfered
+            // flange: the floor across the chain out to the pin's nose, and
+            // on past the chain's far face to the flange's far edge
+            translate([xg_x0, xg_yc, 0]) cube([xg_x1 - xg_x0, xg_edge - xg_yc, xg_floor]);
+            // the wing past the chain's wing-side face, corner chamfered
             linear_extrude(xg_floor) polygon([
-                [xg_x0, 0.01], [xg_x0, xg_wing + 3], [xg_x0 + 3, xg_wing],
+                [xg_x0, xg_yc + 0.01], [xg_x0, xg_wing + 3], [xg_x0 + 3, xg_wing],
                 [xg_holes[0][0] + ins_pad / 2 + 2, xg_wing],
-                [xg_wall1, 0.01]]);
-            // pads round the inserts
+                [xg_wall1, xg_yc + 0.01]]);
             for (p = xg_holes) translate([p[0], p[1], 0])
-                cylinder(d = ins_pad, h = pad_h, $fn = 48);
+                if (xg_in_channel(p))
+                    // a low pad in the channel
+                    cylinder(d = ins_pad, h = pad_h, $fn = 48);
+                else
+                    // at a wall: a full-height boss, kept out of the channel
+                    difference() {
+                        union() {
+                            cylinder(d = ins_pad, h = height - edge_c, $fn = 48);
+                            translate([0, 0, height - edge_c])
+                                cylinder(d1 = ins_pad, d2 = ins_pad - 2 * edge_c, h = edge_c, $fn = 48);
+                        }
+                        translate([-ins_pad, xg_ch[0] - p[1], -1])
+                            cube([2 * ins_pad, xg_ch[1] - xg_ch[0], height + 2]);
+                    }
         }
-        for (i = [0 : 2]) translate([xg_holes[i][0], xg_holes[i][1], 0]) {
+        // M4 heat-set from the gantry face, screw clearance on through the
+        // top (into the channel for the middle one): any screw length fits
+        for (p = xg_holes) translate([p[0], p[1], 0]) {
             translate([0, 0, -1]) cylinder(d = ins_d, h = ins_l + 1 + 1, $fn = 40);
-            // screw clearance past the insert: through the wing's pad, deep
-            // into the wall, and blind under the channel (no screw tip in
-            // the cables)
-            zc = i == 2 ? pad_h - ins_cap : i == 1 ? height - 2 : pad_h + 1;
-            translate([0, 0, ins_l]) cylinder(d = m4_d, h = zc - ins_l, $fn = 32);
+            translate([0, 0, ins_l]) cylinder(d = m4_d, h = height + 1, $fn = 32);
         }
     }
 }
