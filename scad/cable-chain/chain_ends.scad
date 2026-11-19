@@ -24,8 +24,10 @@
 //                    of the bottom 4040, centred, 4x M3 into T-nuts (20 mm
 //                    across the rail = its two slots, 38.6 along it). Pin end.
 //     | "z_top"      Z chain, moving end: the old "z cable chain top mount"
-//                    (on the X gantry), same face, foot and 2x M3. Hole end.
-//                    z_top_foot says which side of the bend its foot is on.
+//                    (on the X gantry), same face and foot; 2x M3 up from
+//                    under the gantry into heat-sets. Hole end.
+//                    Holds its link either way up: the link's way up picks
+//                    which way the chain curls from the foot.
 // part = "end" (as printed) | "in_place" (link frame) | "end_check" (overlap
 //      with the neighbor link at bend check_a: renders empty when clear)
 //      | "end_asm" (the end and its neighbor at check_a). Not "check" or
@@ -40,7 +42,7 @@ end   = "x_bottom";
 include <chain_link.scad>
 part  = "end";
 chain = end == "x_bottom" || end == "x_toolhead" ? "x" : "z";
-z_top_foot = "inside";   // "inside" | "outside": the foot's side of the bend
+check_flip = false;  // end_check / end_asm: the neighbor fitted upside down
 
 m3_d     = 3.4;    // M3 clearance
 m3_head  = 6.0;    // counterbore for an M3 socket head
@@ -63,12 +65,16 @@ module outer_profile_rigid() {     // pin end: the next link is held
         translate([0, h]) circle(d = hole_d);
     }
 }
-module inner_profile_rigid() {     // hole end: the previous link is held
+// Hole end: the previous link is held, either way up. Cut for it at
+// straight both ways (+-flat_stop): the link's own straight stop then holds
+// it on whichever pose it's in, and the end's plate the other way.
+module inner_profile_rigid() {
     difference() {
         translate([pitch, h]) { nose(); front_body(pitch + stop_ext); }
         translate([0, h]) {
             offset(delta = gap) nose();
-            rotate(flat_stop) offset(delta = rigid_fit) front_body(pitch + 10);
+            for (a = [flat_stop, -flat_stop])
+                rotate(a) offset(delta = rigid_fit) front_body(pitch + 10);
         }
     }
 }
@@ -242,18 +248,19 @@ module x_toolhead_print() { x_toolhead(); }
 // The old part, in this frame (pivot at x = 0, z = h; it's the same size
 // link): a block from zt_x0 to the mounting face at zt_face, the link's full
 // height plus a foot below it to z = -20, with a cable window through it
-// along the chain. 2x M3 through the foot, parallel to the chain, at
-// z = -15, counterbored on the chain side.
+// along the chain. 2x M3 in the foot, parallel to the chain, at z = -15:
+// the screws come up from under the gantry into heat-sets pressed in from
+// the mounting face, then clearance on through for a longer screw's tip.
 zt_x0    = 14.3;
 zt_face  = 23.8;
 zt_foot  = -20;
 zt_holes = [[10.1, -15], [-12.0, -15]];   // [y from the chain's centre, z]
 zt_win_h = 18.2;   // window height (z), centred on the pivot
+m3_ins_d = 4.0;    // bore for an M3 heat-set, 4 OD x 5 long
+m3_ins_l = 5;      // the bore is 1 deeper
 
 module z_top() {
-    // the link half: flipped about the pivot height when the foot is on the
-    // outside of the bend (the mount stays put)
-    flip_z(z_top_foot == "outside") link_plates(-nose_r - 1, zt_face, rigid = true);
+    link_plates(-nose_r - 1, zt_face, rigid = true);
     difference() {
         hull() {
             translate([zt_x0, edge_c, zt_foot]) cube([zt_face - zt_x0, width - 2 * edge_c, height - zt_foot]);
@@ -262,7 +269,7 @@ module z_top() {
         translate([zt_x0 - 1, 2 * t, h - zt_win_h / 2]) cube([zt_face - zt_x0 + 2, inner_w, zt_win_h]);
         for (p = zt_holes) translate([0, width / 2 + p[0], p[1]]) rotate([0, 90, 0]) {
             translate([0, 0, zt_x0 - 1]) cylinder(d = m3_d, h = zt_face - zt_x0 + 2, $fn = 32);
-            translate([0, 0, zt_x0 - 1]) cylinder(d = m3_head, h = 1 + m3_head_h, $fn = 48);
+            translate([0, 0, zt_face - m3_ins_l - 1]) cylinder(d = m3_ins_d, h = m3_ins_l + 2, $fn = 40);
         }
     }
 }
@@ -270,7 +277,7 @@ module z_top() {
 // holes' row and the cable window, the full width (41 mm is what a 7-char
 // SHA needs at the minimum stroke).
 module z_top_tag() {
-    z0 = zt_holes[0][1] + m3_d / 2 + 0.5;   // above the screw holes
+    z0 = zt_holes[0][1] + m3_ins_d / 2 + 0.5;   // above the insert bores
     z1 = h - zt_win_h / 2 - 0.5;            // below the window
     translate([zt_face, width / 2, (z0 + z1) / 2]) rotate([0, 90, 0]) rotate([0, 0, 90])
         provenance(w = width - 4, h = z1 - z0, mode = "inlay");
@@ -294,7 +301,7 @@ end_is_pin = end == "x_bottom" || end == "z_base";
 module neighbor(a) {
     if (end_is_pin)
         translate([pitch, 0, h]) rotate([0, a, 0]) translate([0, 0, -h]) { link(); bar(); }
-    else flip_z(end == "z_top" && z_top_foot == "outside")
+    else flip_z(check_flip)
         translate([0, 0, h]) rotate([0, -a, 0]) translate([-pitch, 0, -h]) { link(); bar(); }
 }
 
