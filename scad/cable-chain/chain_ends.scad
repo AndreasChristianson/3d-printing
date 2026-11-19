@@ -16,9 +16,10 @@
 //                    mount v8", M4 down through the gantry into heat-sets.
 //                    The chain's Y+ edge stays where the old one was; the
 //                    extra width goes to Y-. Pin end.
-//     | "x_toolhead" X chain, moving end: sits on the toolhead's top
-//                    bracket, 2x M3 in line along the chain, 12 mm apart
-//                    (the old 100% "Fixed end 2 holes", printed at 150%).
+//     | "x_toolhead" X chain, moving end: the old toolhead arm (2x M3
+//                    down into the toolhead, sticking out the back), its
+//                    pin block swapped for hangers holding a hole end
+//                    under it. The link swings freely through 180 deg.
 //                    Hole end.
 //     | "z_base"     Z chain, fixed end: a plate on top
 //                    of the bottom 4040, centred, 4x M3 into T-nuts (20 mm
@@ -216,32 +217,117 @@ module x_bottom_print() { x_bottom(); }
 
 // ---------- X chain, toolhead end (hole end) ----------
 
-xt_holes = [14.8, 26.8];  // pivot to the holes along the chain (the old
-                          //   end's 9.87 / 17.87 at 150%)
-xt_floor = 6;      // floor thickness, on the inside of the bend (z = 0)
-xt_x0    = 11;     // floor starts here: the previous link's front corner
-                   //   sweeps in to x ~10 at the floor's height
-xt_x1    = xt_holes[1] + 5;
+// The old toolhead arm ("old toolhead mount.stl", exported from Fusion),
+// kept: a 20.5 x 10 x 5 foot with 2x M3 side by side, 7.5 apart,
+// counterbored from the top, screwed down onto the toolhead; a 10.5 x 5 arm
+// from it straight out the back (now 13 wide, for the tag). Its pin block
+// hung under the arm's end, the old chain's last link hooked over the pin's
+// stubs.
+//
+// Now: the end's two hole plates are bare round noses (no shoulders, so no
+// bend stops), each held from outside the chain by a hanger plate hanging
+// from the arm. Nothing of the neighbor link is outside its side plates, so
+// the hangers can be any shape; the neighbor sweeps everything within its
+// half-height (11) of the pivot, so the arm has to stay out of that on
+// the whole swing. The swing is 180 deg about xt_c, so the arm sits up and
+// to the -X side of the pivot. Needed on the printer: from a little -X of
+// straight down (at max X) to straight out +X (at min X); 180 about 40 deg
+// gives 40 deg spare either way, to change the chain's length.
+//
+// Frame F, as installed: X = printer X, Y along the arm toward the back
+// (0 = the screw row), Z up (0 = the arm's top face).
+xt_foot   = [20.5, 10];  // foot (X, Y), centred on the screw row
+xt_screws = 7.5;         // M3 spacing, across the arm (X)
+xt_cb     = [6.0, 2];    // counterbore (d, depth), from the top face
+xt_arm    = [13, 5];     // arm (width X, thickness Z): 10.5 on the old
+                         //   one, widened so the tag's SHA fits (needs 10)
+xt_fillet = 5;           // foot-to-arm fillets
+xt_y0     = 41.75;       // the old chain's near edge: the near hanger's
+                         //   outside face (the extra width goes to +Y,
+                         //   away from the toolhead)
+xt_hang   = 4;           // hanger thickness (Y), outside each side plate
+xt_drop   = 12;          // arm's underside to the pivot (old 10.5: a link
+                         //   straight out sideways, half-height 11, hit it)
+xt_off    = 11.5;        // pivot's +X offset from the arm's centreline
+xt_c      = 40;          // centre of the swing, deg from down toward +X
+xt_swing  = 90;          // free each way about xt_c
+xt_recess = 0.6;         // hole carried this deep into the hangers: the pin's
+                         //   tip is flush with the plate's outside face
 
-module x_toolhead() {
+xt_y1 = xt_y0 + 2 * xt_hang + width;                   // the arm's far end
+xt_P  = [xt_off, xt_y0 + xt_hang, -xt_arm[1] - xt_drop];  // pivot, at the
+                                                       //   near side plate's outside face
+// Link frame (E) in F: E's +x (the end's body) points away from the swing's
+// centre, so the neighbor at a = 0 hangs at xt_c; E's z = x cross y.
+xt_u = [-sin(xt_c), 0, cos(xt_c)];
+xt_w = [-cos(xt_c), 0, -sin(xt_c)];
+xt_EF = [[xt_u.x, 0, xt_w.x, xt_P.x - h * xt_w.x],
+         [0,      1, 0,      xt_P.y],
+         [xt_u.z, 0, xt_w.z, xt_P.z - h * xt_w.z],
+         [0, 0, 0, 1]];
+xt_FE = [[xt_u.x, 0, xt_u.z, -(xt_u * xt_P)],
+         [0,      1, 0,      -xt_P.y],
+         [xt_w.x, 0, xt_w.z, h - xt_w * xt_P],
+         [0, 0, 0, 1]];
+
+// E frame: the hole plates, round noses with the link's hole and lead-in
+// ramp (side_plate()'s outer layer, minus the body and its shoulders).
+module xt_plates_E() {
+    both_sides() difference() {
+        slab(0, t) translate([0, h]) difference() { nose(); circle(d = hole_d); }
+        translate([-hole_d / 2, t, h]) rotate([0, 0, atan2(ramp_k, -1)])
+            translate([0, -50, -50]) cube(100);
+    }
+}
+module xt_recess_E() {
+    both_sides() translate([0, 0.01, h]) rotate([90, 0, 0])
+        cylinder(d = hole_d, h = xt_recess + 0.01);
+}
+
+module x_toolhead_F() {
     difference() {
         union() {
-            // the plates, short of the inner layer's front nose
-            link_plates(-nose_r - 1, pitch - nose_r - 1);
-            // floor, full width
-            hull() {
-                translate([xt_x0, edge_c, 0]) cube([xt_x1 - xt_x0, width - 2 * edge_c, xt_floor]);
-                translate([xt_x0, 0, edge_c]) cube([xt_x1 - xt_x0, width, xt_floor - edge_c]);
+            // foot, arm and fillets
+            translate([0, 0, -xt_arm[1]]) linear_extrude(xt_arm[1]) {
+                translate([-xt_foot.x / 2, -xt_foot.y / 2]) square(xt_foot);
+                translate([-xt_arm.x / 2, 0]) square([xt_arm.x, xt_y1]);
+                difference() {
+                    translate([-xt_foot.x / 2, xt_foot.y / 2 - 0.01])
+                        square([xt_foot.x, xt_fillet]);
+                    for (s = [-1, 1])
+                        translate([s * (xt_arm.x / 2 + xt_fillet), xt_foot.y / 2 + xt_fillet])
+                            circle(r = xt_fillet);
+                }
             }
+            // hangers: the nose round the pivot, hulled up to the arm
+            for (y = [xt_y0, xt_y1 - xt_hang])
+                translate([0, y + xt_hang, 0]) rotate([90, 0, 0]) linear_extrude(xt_hang)
+                    hull() {
+                        translate([xt_P.x, xt_P.z]) circle(r = nose_r);
+                        translate([-xt_arm.x / 2, -xt_arm[1]]) square(xt_arm);
+                    }
+            multmatrix(xt_EF) xt_plates_E();
         }
-        for (x = xt_holes) translate([x, width / 2, 0]) {
-            translate([0, 0, -1]) cylinder(d = m3_d, h = xt_floor + 2, $fn = 32);
-            translate([0, 0, xt_floor - m3_head_h]) cylinder(d = m3_head, h = 10, $fn = 48);
+        multmatrix(xt_EF) xt_recess_E();
+        for (s = [-1, 1]) translate([s * xt_screws / 2, 0, 0]) {
+            translate([0, 0, -xt_arm[1] - 1]) cylinder(d = m3_d, h = xt_arm[1] + 2, $fn = 32);
+            translate([0, 0, -xt_cb[1]]) cylinder(d = xt_cb[0], h = xt_cb[1] + 1, $fn = 48);
         }
     }
 }
-// As printed: floor on the bed.
-module x_toolhead_print() { x_toolhead(); }
+// Its tag: inlaid in the arm's top face (on the bed), from the foot's
+// fillets to the arm's end (the top face runs flat over the hangers).
+module x_toolhead_tag_F() {
+    y0 = xt_foot.y / 2 + xt_fillet + 1;
+    y1 = xt_y1 - 1;
+    translate([0, (y0 + y1) / 2, 0]) rotate([0, 0, 90])
+        provenance(w = y1 - y0, h = xt_arm.x - 2, mode = "inlay");
+}
+module x_toolhead() { multmatrix(xt_FE) x_toolhead_F(); }
+// As printed: the arm's top face on the bed, the hangers up.
+module x_toolhead_print() {
+    rotate([0, 180, 0]) with_provenance() { x_toolhead_F(); x_toolhead_tag_F(); }
+}
 
 // ---------- Z chain, gantry end (hole end) ----------
 
