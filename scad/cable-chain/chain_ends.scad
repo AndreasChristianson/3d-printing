@@ -249,15 +249,16 @@ module x_toolhead_print() { x_toolhead(); }
 // link): a block from zt_x0 to the mounting face at zt_face, the link's full
 // height plus a foot below it to z = -20, with a cable window through it
 // along the chain. 2x M3 in the foot, parallel to the chain, at z = -15:
-// the screws come up from under the gantry into heat-sets pressed in from
-// the mounting face, then clearance on through for a longer screw's tip.
+// the screws come up from under the gantry, through clearance in the foot,
+// into heat-sets pressed in from its far (chain-side) face, so the foot is
+// pinched between the gantry and the inserts' flanges.
 zt_x0    = 14.3;
 zt_face  = 23.8;
 zt_foot  = -20;
 zt_holes = [[10.1, -15], [-12.0, -15]];   // [y from the chain's centre, z]
 zt_win_h = 18.2;   // window height (z), centred on the pivot
 m3_ins_d = 4.0;    // bore for an M3 heat-set, 4 OD x 5 long
-m3_ins_l = 5;      // the bore is 1 deeper
+m3_ins_l = 5;      // bore depth: the insert sits flush
 
 module z_top() {
     link_plates(-nose_r - 1, zt_face, rigid = true);
@@ -269,7 +270,7 @@ module z_top() {
         translate([zt_x0 - 1, 2 * t, h - zt_win_h / 2]) cube([zt_face - zt_x0 + 2, inner_w, zt_win_h]);
         for (p = zt_holes) translate([0, width / 2 + p[0], p[1]]) rotate([0, 90, 0]) {
             translate([0, 0, zt_x0 - 1]) cylinder(d = m3_d, h = zt_face - zt_x0 + 2, $fn = 32);
-            translate([0, 0, zt_face - m3_ins_l - 1]) cylinder(d = m3_ins_d, h = m3_ins_l + 2, $fn = 40);
+            translate([0, 0, zt_x0 - 1]) cylinder(d = m3_ins_d, h = 1 + m3_ins_l, $fn = 40);
         }
     }
 }
